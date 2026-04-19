@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Details | AyuSync Practitioner</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="../js/doctor-common.js" defer></script>
+  <script type="module" src="../js/doctor-data.js" defer></script>
+</head>
+<body>
+  <!-- Sidebar injected by doctor-common.js -->
+  <div class="main-content">
+    <div class="max-w-5xl mx-auto p-8">
+      <!-- Patient Header -->
+      <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-3xl p-8 mb-10 shadow-2xl">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-8">
+          <div class="w-32 h-32 bg-white/20 rounded-3xl flex items-center justify-center text-6xl font-bold mb-6 lg:mb-0 flex-shrink-0 shadow-2xl">
+            👩
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-5xl font-bold mb-2" id="patientName">Priya Sharma</h1>
+            <div class="flex flex-wrap gap-6 text-2xl mb-6" id="patientInfo">
+              <!-- Dynamic -->
+            </div>
+            <div class="flex flex-wrap gap-4">
+              <button onclick="startNewConsultation()" class="px-8 py-4 bg-white/30 backdrop-blur-xl rounded-2xl font-bold text-lg hover:bg-white/50 transition-all shadow-xl">
+                <i class="fas fa-plus mr-2"></i>New Consultation
+              </button>
+              <button onclick="viewHistory()" class="px-8 py-4 bg-white/30 backdrop-blur-xl rounded-2xl font-bold text-lg hover:bg-white/50 transition-all shadow-xl">
+                <i class="fas fa-history mr-2"></i>Treatment History
+              </button>
+              <button onclick="downloadReport()" class="px-8 py-4 bg-white/30 backdrop-blur-xl rounded-2xl font-bold text-lg hover:bg-white/50 transition-all shadow-xl">
+                <i class="fas fa-download mr-2"></i>Download Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-10">
+        <!-- Profile & Contact -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+          <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+            <i class="fas fa-id-card text-green-600 mr-4 text-2xl"></i>
+            Profile Information
+          </h2>
+          <div class="space-y-6 text-lg" id="profileDetails">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-gradient-to-br from-emerald-50 to-green-100 rounded-3xl shadow-2xl p-10 border border-emerald-200">
+          <h2 class="text-3xl font-bold text-emerald-800 mb-8">📊 Progress Summary</h2>
+          <div class="grid grid-cols-2 gap-6 mb-8">
+            <div class="text-center p-6 bg-white/60 rounded-2xl backdrop-blur-sm">
+              <div class="text-4xl font-bold text-emerald-600 mb-2" id="sessionsCompleted">3/7</div>
+              <p class="text-emerald-800 font-semibold">Sessions</p>
+            </div>
+            <div class="text-center p-6 bg-white/60 rounded-2xl backdrop-blur-sm">
+              <div class="text-4xl font-bold text-green-600 mb-2" id="painReduction">50%</div>
+              <p class="text-emerald-800 font-semibold">Pain ↓</p>
+            </div>
+            <div class="text-center p-6 bg-white/60 rounded-2xl backdrop-blur-sm">
+              <div class="text-4xl font-bold text-blue-600 mb-2" id="ratingScore">4.8</div>
+              <p class="text-emerald-800 font-semibold">Rating</p>
+            </div>
+            <div class="text-center p-6 bg-white/60 rounded-2xl backdrop-blur-sm">
+              <div class="text-4xl font-bold text-purple-600 mb-2" id="totalCost">₹5,600</div>
+              <p class="text-emerald-800 font-semibold">Spent</p>
+            </div>
+          </div>
+          <canvas id="painProgressChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabs: History, Prescriptions, Labs, Feedback -->
+      <div class="mt-12">
+        <div class="flex border-b border-gray-200 mb-8">
+          <button class="tab-btn px-8 py-4 text-xl font-bold border-b-4 border-transparent hover:border-green-500 hover:text-green-600 transition-all mr-1" onclick="showTab('history')">
+            📜 Treatment History
+          </button>
+          <button class="tab-btn px-8 py-4 text-xl font-bold border-b-4 border-transparent hover:border-green-500 hover:text-green-600 transition-all mr-1" onclick="showTab('prescriptions')">
+            💊 Prescriptions
+          </button>
+          <button class="tab-btn px-8 py-4 text-xl font-bold border-b-4 border-transparent hover:border-green-500 hover:text-green-600 transition-all mr-1" onclick="showTab('labs')">
+            🧪 Lab Reports
+          </button>
+          <button class="tab-btn px-8 py-4 text-xl font-bold border-b-4 border-transparent hover:border-green-500 hover:text-green-600" onclick="showTab('feedback')">
+            ⭐ Feedback
+          </button>
+        </div>
+
+        <div id="historyTab" class="tab-content">
+          <div class="bg-white rounded-3xl shadow-xl p-10">
+            <div id="historyList" class="space-y-6">
+              <!-- Dynamic history -->
+            </div>
+          </div>
+        </div>
+
+        <div id="prescriptionsTab" class="tab-content hidden">
+          <div class="bg-white rounded-3xl shadow-xl p-10">
+            <div id="prescriptionsList" class="space-y-6">
+              <!-- Dynamic prescriptions -->
+            </div>
+            <button onclick="createPrescription()" class="mt-8 px-8 py-4 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 shadow-xl transition-all">
+              <i class="fas fa-plus mr-2"></i>New Prescription
+            </button>
+          </div>
+        </div>
+
+        <div id="labsTab" class="tab-content hidden">
+          <div class="bg-white rounded-3xl shadow-xl p-10">
+            <h3 class="text-2xl font-bold mb-8">📋 Recommended Tests</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 border-2 border-dashed border-gray-300 rounded-2xl text-center hover:border-green-400 transition-all cursor-pointer" onclick="addLabReport()">
+                <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
+                <h4 class="font-bold text-xl mb-2">Upload Report</h4>
+                <p class="text-gray-600">CBC, ESR, Liver Function</p>
+              </div>
+              <div class="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl shadow-2xl hover:shadow-3xl transition-all cursor-pointer" onclick="viewLabs()">
+                <i class="fas fa-file-medical-alt text-4xl mb-4"></i>
+                <h4 class="font-bold text-xl mb-2">View All Reports</h4>
+                <p>3 Reports Available</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="feedbackTab" class="tab-content hidden">
+          <div class="bg-white rounded-3xl shadow-xl p-10">
+            <div id="feedbackList" class="space-y-6">
+              <!-- Dynamic feedback -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentPatient = null;
+    let activeTab = 'history';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPatientDetail();
+    });
+
+    function loadPatientDetail() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const patientId = urlParams.get('id');
+      
+      if (patientId) {
+        currentPatient = doctorData.patients.find(p => p.id == patientId || p.name.toLowerCase().replace(/ /g, '-') === patientId);
+      } else {
+        currentPatient = doctorData.patients[0]; // Default to first
+      }
+
+      if (!currentPatient) {
+        alert('Patient not found');
+        window.location.href = 'patients-list.html';
+        return;
+      }
+
+      renderPatientDetail();
+    }
+
+    function renderPatientDetail() {
+      document.getElementById('patientName').textContent = currentPatient.name;
+      document.getElementById('patientInfo').innerHTML = `
+        <span class="px-6 py-3 bg-white/30 backdrop-blur-xl rounded-2xl shadow-lg">${currentPatient.age} years • ${currentPatient.gender}</span>
+        <span class="px-6 py-3 bg-white/30 backdrop-blur-xl rounded-2xl shadow-lg">${currentPatient.dosha}</span>
+        <span class="px-6 py-3 bg-white/30 backdrop-blur-xl rounded-2xl shadow-lg">${currentPatient.condition}</span>
+        <span class="px-6 py-3 bg-white/30 backdrop-blur-xl rounded-2xl shadow-lg">ID: ${currentPatient.id}</span>
+      `;
+
+      // Profile details
+      document.getElementById('profileDetails').innerHTML = `
+        <div class="flex items-start space-x-6 p-6 bg-gray-50 rounded-2xl">
+          <i class="fas fa-phone text-2xl text-gray-500 mt-1 flex-shrink-0"></i>
+          <div>
+            <div class="font-semibold text-gray-700">Phone</div>
+            <a href="tel:${currentPatient.phone}" class="text-xl font-bold text-blue-600 hover:text-blue-700">${currentPatient.phone}</a>
+          </div>
+        </div>
+        <div class="flex items-start space-x-6 p-6 bg-gray-50 rounded-2xl">
+          <i class="fas fa-calendar text-2xl text-gray-500 mt-1 flex-shrink-0"></i>
+          <div>
+            <div class="font-semibold text-gray-700">Last Visit</div>
+            <div class="text-xl font-bold text-green-600">${currentPatient.lastVisit}</div>
+          </div>
+        </div>
+        <div class="flex items-start space-x-6 p-6 bg-gray-50 rounded-2xl">
+          <i class="fas fa-stethoscope text-2xl text-gray-500 mt-1 flex-shrink-0"></i>
+          <div>
+            <div class="font-semibold text-gray-700">Primary Condition</div>
+            <div class="text-xl font-bold">${currentPatient.condition}</div>
+            <div class="text-sm text-gray-600 mt-1">${currentPatient.history.join(', ')}</div>
+          </div>
+        </div>
+      `;
+
+      renderTabs();
+      initPainChart();
+      updateStats();
+    }
+
+    function renderTabs() {
+      // History
+      document.getElementById('historyList').innerHTML = currentPatient.history.map((item, i) => `
+        <div class="p-8 border-l-8 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-lg">
+          <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 bg-green-500 text-white rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0 mt-1">
+              ${i+1}
+            </div>
+            <div class="flex-1">
+              <h4 class="text-2xl font-bold text-gray-800 mb-2">${item}</h4>
+              <p class="text-gray-600">Session completed on ${currentPatient.lastVisit}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Prescriptions
+      const rx = doctorData.prescriptions.filter(p => p.patientId === currentPatient.id);
+      document.getElementById('prescriptionsList').innerHTML = rx.length ? 
+        rx.map(p => `
+          <div class="p-6 border border-gray-200 rounded-2xl hover:shadow-md transition-all">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="text-xl font-bold text-gray-800">Rx #${p.id}</h4>
+              <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-xl font-semibold">${p.date}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div><strong>Diagnosis:</strong> ${p.diagnosis}</div>
+              <div><strong>Medicines:</strong> ${p.medicines.length}</div>
+              <div><strong>Therapies:</strong> ${p.therapies.join(', ')}</div>
+              <div><strong>Follow-up:</strong> ${p.followUp}</div>
+            </div>
+            <button onclick="generatePrescriptionPDF(${p.id})" class="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700">
+              <i class="fas fa-download mr-2"></i>Download PDF
+            </button>
+          </div>
+        `).join('') : '<p class="text-gray-500 text-center py-20 text-xl">No prescriptions yet</p>';
+
+      // Feedback
+      document.getElementById('feedbackList').innerHTML = `
+        <div class="p-8 text-center bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl border-4 border-yellow-200">
+          <i class="fas fa-star text-6xl text-yellow-400 mb-6"></i>
+          <h3 class="text-3xl font-bold text-gray-800 mb-4">4.8⭐ Average Rating</h3>
+          <p class="text-xl text-gray-600 mb-8">"Excellent care! Pain reduced significantly after Kati Basti sessions."</p>
+          <div class="flex justify-center space-x-4 text-sm text-gray-500">
+            <span>Session 1: ★★★★☆</span>
+            <span>Session 2: ★★★★★</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById(tab + 'Tab').classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-green-500', 'text-green-600'));
+      event.target.classList.add('border-green-500', 'text-green-600');
+      activeTab = tab;
+    }
+
+    function initPainChart() {
+      const ctx = document.getElementById('painProgressChart');
+      if (ctx) {
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Today'],
+            datasets: [{
+              label: 'Pain Level',
+              data: [8, 6, 4, 3],
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 10 } },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('sessionsCompleted').textContent = '3/7';
+      document.getElementById('painReduction').textContent = '50%';
+      document.getElementById('ratingScore').textContent = '4.8';
+      document.getElementById('totalCost').textContent = '₹5,600';
+    }
+
+    // Actions
+    function startNewConsultation() {
+      window.location.href = `consultation.html?patient=${currentPatient.id}`;
+    }
+
+    function viewHistory() {
+      showTab('history');
+    }
+
+    function downloadReport() {
+      showToast('Patient report downloaded!');
+    }
+
+    function createPrescription() {
+      window.location.href = `prescription.html?patient=${currentPatient.id}`;
+    }
+
+    function addLabReport() {
+      showToast('Lab upload feature coming soon!');
+    }
+
+    function viewLabs() {
+      showTab('labs');
+    }
+  </script>
+</body>
+</html>
+

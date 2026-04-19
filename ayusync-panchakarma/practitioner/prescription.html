@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prescription | AyuSync Practitioner</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script type="module" src="../js/doctor-common.js" defer></script>
+  <script type="module" src="../js/doctor-data.js" defer></script>
+</head>
+<body>
+  <!-- Sidebar injected by doctor-common.js -->
+  <div class="main-content">
+    <div class="max-w-4xl mx-auto p-8">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-3xl p-10 text-center shadow-2xl mb-12">
+        <i class="fas fa-file-prescription text-6xl mb-6 opacity-90"></i>
+        <h1 class="text-5xl font-bold mb-4">Prescription</h1>
+        <div id="prescriptionHeader" class="text-2xl">
+          <!-- Patient & Doctor info -->
+        </div>
+        <div class="mt-6 flex flex-wrap gap-4 justify-center">
+          <button onclick="previewPDF()" class="px-10 py-4 bg-white/30 backdrop-blur-xl rounded-3xl font-bold text-xl hover:bg-white/50 transition-all shadow-2xl">
+            <i class="fas fa-eye mr-2"></i>Preview
+          </button>
+          <button onclick="downloadPDF()" class="px-12 py-4 bg-white text-emerald-700 font-bold text-xl rounded-3xl shadow-2xl hover:shadow-3xl hover:bg-gray-100 transition-all">
+            <i class="fas fa-download mr-2"></i>Download PDF
+          </button>
+          <button onclick="shareWhatsApp()" class="px-10 py-4 bg-green-500 hover:bg-green-600 text-white font-bold text-xl rounded-3xl shadow-2xl transition-all">
+            <i class="fab fa-whatsapp mr-2"></i>Share WhatsApp
+          </button>
+          <button onclick="emailPrescription()" class="px-10 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-3xl shadow-2xl transition-all">
+            <i class="fas fa-envelope mr-2"></i>Email
+          </button>
+        </div>
+      </div>
+
+      <!-- Prescription Content (PDF Preview) -->
+      <div id="prescriptionPreview" class="bg-gradient-to-br from-gray-50 to-white rounded-4xl shadow-2xl border-8 border-white p-16 mb-12 min-h-[800px] max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="inline-block p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-3xl shadow-2xl mb-6">
+            <i class="fas fa-hospital text-3xl mr-4"></i>
+            <span class="text-3xl font-bold">AyuSync Panchakarma Center</span>
+          </div>
+          <h1 class="text-5xl font-bold text-gray-800 mb-4">PRESCRIPTION</h1>
+          <div class="flex flex-col md:flex-row gap-8 justify-center text-2xl font-bold text-gray-700 mb-12">
+            <div id="pdfPatientName" class="text-center">Priya Sharma</div>
+            <div class="h-px bg-gray-300 md:w-32 self-center"></div>
+            <div id="pdfPatientId" class="text-center">ID: P-001</div>
+          </div>
+          <p class="text-xl text-gray-600">Date: <span id="pdfDate"></span></p>
+        </div>
+
+        <div class="space-y-12">
+          <!-- Doctor Info -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="fas fa-user-md text-green-600 mr-4"></i>Doctor Details
+            </h3>
+            <div id="doctorDetails" class="grid grid-cols-1 md:grid-cols-2 gap-8 text-xl">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Diagnosis -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="fas fa-stethoscope text-blue-600 mr-4"></i>Diagnosis
+            </h3>
+            <div id="pdfDiagnosis" class="text-2xl text-gray-800 leading-relaxed whitespace-pre-wrap p-6 bg-blue-50 rounded-2xl border-l-8 border-blue-400">
+              Chronic lower back pain due to Vata imbalance...
+            </div>
+          </div>
+
+          <!-- Medicines -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+              <i class="fas fa-pills text-orange-600 mr-4"></i>Medicines
+            </h3>
+            <div id="pdfMedicines" class="space-y-6">
+              <!-- Dynamic medicine list -->
+            </div>
+          </div>
+
+          <!-- Therapies -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+              <i class="fas fa-spa text-purple-600 mr-4"></i>Therapies
+            </h3>
+            <div id="pdfTherapies" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xl">
+              <!-- Dynamic -->
+            </div>
+          </div>
+
+          <!-- Lab Tests -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="fas fa-vial text-indigo-600 mr-4"></i>Lab Tests
+            </h3>
+            <ul id="pdfLabs" class="list-disc list-inside space-y-2 text-xl text-indigo-800">
+              <!-- Dynamic -->
+            </ul>
+          </div>
+
+          <!-- Follow-up -->
+          <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200 text-center">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6">📅 Follow-up</h3>
+            <div id="pdfFollowUp" class="text-2xl font-bold text-green-700 p-8 bg-green-50 rounded-2xl border-4 border-green-200">
+              Next visit: <span id="followUpDatePDF"></span>
+            </div>
+          </div>
+
+          <!-- Signature -->
+          <div class="border-t-4 border-gray-300 pt-12 mt-16 text-center">
+            <div class="inline-block p-6 bg-gray-100 rounded-2xl shadow-inner">
+              <div class="text-4xl font-bold text-gray-800 mb-4" id="doctorSignature">Dr. Anjali Varma</div>
+              <div class="text-xl text-gray-600 mb-2">BAMS, MD (Panchakarma)</div>
+              <div class="text-lg font-semibold text-green-700">Reg. No: AYU-001/BLR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Prescription Form (collapsible) -->
+      <details class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-200 mb-12">
+        <summary class="text-2xl font-bold text-gray-800 cursor-pointer select-none p-4 rounded-2xl hover:bg-gray-50 transition-all">
+          <i class="fas fa-edit mr-4 text-green-600"></i>Edit Prescription Details
+        </summary>
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8 border-t border-gray-200">
+          <!-- Simplified edit form -->
+          <textarea id="editDiagnosis" rows="4" class="w-full p-6 border-2 border-gray-200 rounded-2xl resize-vertical focus:border-green-500 shadow-xl" placeholder="Update diagnosis..."></textarea>
+          <div>
+            <label class="block font-bold mb-4">Follow-up Date</label>
+            <input type="date" id="editFollowUp" class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-green-500 shadow-xl">
+          </div>
+          <button onclick="updatePrescription()" class="col-span-2 px-12 py-6 bg-green-600 hover:bg-green-700 text-white font-bold text-2xl rounded-3xl shadow-2xl transition-all col-span-full">
+              <i class="fas fa-save mr-3"></i>Update & Regenerate
+            </button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', loadPrescription);
+
+    function loadPrescription() {
+      const { jsPDF } = window.jspdf;
+      window.jsPDF = jsPDF; // Make available globally
+
+      // Load from consultation or default
+      const patientId = new URLSearchParams(window.location.search).get('patient');
+      const patient = doctorData.patients.find(p => p.id == patientId);
+      
+      if (patient) {
+        document.getElementById('prescriptionHeader').innerHTML = `
+          <div class="text-3xl font-bold mb-2">${patient.name}</div>
+          <div class="text-2xl opacity-90">Age: ${patient.age} | Condition: ${patient.condition}</div>
+        `;
+      }
+
+      renderPrescriptionPreview();
+      document.getElementById('pdfDate').textContent = new Date().toLocaleDateString('en-IN');
+    }
+
+    function renderPrescriptionPreview() {
+      // Doctor details
+      document.getElementById('doctorDetails').innerHTML = `
+        <div><strong class="text-2xl">Dr. ${doctorData.currentDoctor.name}</strong></div>
+        <div class="text-xl">${doctorData.currentDoctor.specialization}</div>
+        <div class="text-xl">${doctorData.currentDoctor.qualifications}</div>
+        <div class="text-xl">Clinic: ${doctorData.currentDoctor.clinic}</div>
+        <div class="text-xl">Contact: ${doctorData.currentDoctor.phone}</div>
+      `;
+
+      // Use consultation data or default
+      document.getElementById('pdfDiagnosis').textContent = 'Chronic lower back pain (Vata-Kapha disorder). Recommend Panchakarma therapy.';
+      
+      document.getElementById('pdfMedicines').innerHTML = doctorData.prescriptions[0].medicines.map(med => `
+        <div class="flex items-start space-x-6 p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl border-l-8 border-orange-400 shadow-md">
+          <div class="w-12 h-12 bg-orange-500 text-white rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 mt-1">Rx</div>
+          <div class="flex-1">
+            <div class="text-2xl font-bold mb-2">${med.name}</div>
+            <div class="text-xl text-gray-700 mb-2">Dosage: ${med.dosage}</div>
+            <div class="text-xl text-gray-700 mb-2">Duration: ${med.duration}</div>
+            <div class="font-semibold text-lg text-orange-800 p-3 bg-orange-100 rounded-xl">${med.instructions}</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('pdfTherapies').innerHTML = `
+        <div class="p-6 text-2xl">
+          <strong>Kati Basti:</strong> 7 sessions (45 mins daily) - Lower back oil pooling therapy
+        </div>
+        <div class="p-6 text-2xl">
+          <strong>Abhyanga:</strong> Daily full body massage with Dhanwantharam oil
+        </div>
+      `;
+
+      document.getElementById('pdfLabs').innerHTML = `
+        <li>✅ CBC (Complete Blood Count)</li>
+        <li>✅ ESR (Erythrocyte Sedimentation Rate)</li>
+        <li>🔄 Liver Function Test (pending)</li>
+      `;
+
+      document.getElementById('followUpDatePDF').textContent = '22 April 2024';
+      document.getElementById('pdfPatientName').textContent = 'Priya Sharma';
+      document.getElementById('pdfPatientId').textContent = `ID: ${doctorData.patients[0].id}`;
+      document.getElementById('doctorSignature').textContent = doctorData.currentDoctor.name;
+    }
+
+    function previewPDF() {
+      // Print preview
+      window.print();
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      
+      // Header
+      doc.setFontSize(24);
+      doc.setFont(undefined, 'bold');
+      doc.text('AyuSync Prescription', 105, 30, { angle: 0, align: 'center' });
+      
+      // Patient info
+      doc.setFontSize(16);
+      doc.text(`Patient: Priya Sharma (ID: ${doctorData.patients[0].id})`, 20, 60);
+      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 20, 75);
+      
+      // Doctor
+      doc.text(`Dr. ${doctorData.currentDoctor.name}`, 20, 100);
+      doc.text(doctorData.currentDoctor.qualifications, 20, 110);
+      
+      // Diagnosis
+      doc.setFontSize(14);
+      doc.text('Diagnosis:', 20, 130);
+      doc.text('Chronic lower back pain (Vata-Kapha disorder)', 30, 140);
+      
+      // Medicines
+      doc.text('Medicines:', 20, 160);
+      doctorData.prescriptions[0].medicines.forEach((med, i) => {
+        doc.text(`${i+1}. ${med.name} - ${med.dosage} for ${med.duration}`, 30, 170 + (i*10));
+      });
+      
+      // Footer
+      doc.text('Follow-up: 22 April 2024', 20, 260);
+      doc.setFontSize(18);
+      doc.text(doctorData.currentDoctor.name, 105, 280, { angle: 0, align: 'center' });
+      
+      doc.save(`prescription_${Date.now()}.pdf`);
+      showToast('Prescription PDF downloaded! ✅');
+    }
+
+    function shareWhatsApp() {
+      const text = '🩺 Your AyuSync Prescription is ready. Download attached PDF.';
+      window.open(`https://wa.me/91${doctorData.patients[0].phone}?text=${encodeURIComponent(text)}`, '_blank');
+      showToast('WhatsApp opened!');
+    }
+
+    function emailPrescription() {
+      showToast('Email sent! (Demo)');
+    }
+
+    function updatePrescription() {
+      showToast('Prescription updated & regenerated!');
+      renderPrescriptionPreview();
+    }
+  </script>
+
+  <style>
+    @media print {
+      .main-content { margin-left: 0 !important; }
+      .sidebar { display: none !important; }
+      #prescriptionPreview { border: none; box-shadow: none; page-break-inside: avoid; }
+    }
+  </style>
+</body>
+</html>
+

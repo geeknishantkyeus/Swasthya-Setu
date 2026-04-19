@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practitioner Dashboard | AyuSync Pro</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<header class="header-fixed">
+        <nav>
+            <div class="logo">🏥 AyuSync Pro</div>
+            <div class="dashboard-nav">
+                <a href="#">📊 Analytics</a>
+                <a href="#">👥 Patients</a>
+                <a href="#">📝 Protocols</a>
+                <a href="#" class="user-profile">👤 Dr. Anjali</a>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container" style="margin-top: 100px;">
+        <h1 style="margin-bottom: 1rem; color: #2d5a2d;">Good Afternoon, Dr. Anjali 👋</h1>
+        <p style="color: #666; margin-bottom: 2rem;">
+            Your Schedule: <strong>6 Patients Today</strong> | Room: Ganga Block - 102
+        </p>
+        
+        <div class="card" style="background: #ffebee; border-left: 5px solid #f44336;">
+            <h3>🚨 PRIORITY QUEUE (Real-Time)</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem; font-weight: bold;">
+                <div style="background: #f8d7da; padding: 1rem; border-radius: 8px;">
+                    🔴 <strong>EMERGENCY:</strong> Rajesh Kumar (Severe Reaction) - Room 102 NOW
+                </div>
+                <div style="color: #FF9800;">🟡 Waitlist: 2 Patients</div>
+                <div style="color: #4CAF50;">🟢 Next Scheduled: Priya Sharma (4:30 PM) - Checked In ✓</div>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 2rem;">
+            <h3>👤 CURRENT PATIENT: Priya Sharma</h3>
+            <p><strong>ID:</strong> #Ayu-2024-0892 | Age: 34 | Dosha: Vata-Kapha</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+                <div>
+                    <h4>📋 TREATMENT PLAN</h4>
+                    <p><strong>Kati Basti</strong></p>
+                    <p>Session 3 of 7</p>
+                    <p><strong>Oil:</strong> Dhanwantharam</p>
+                    <p><strong>Duration:</strong> 45 mins</p>
+                </div>
+                <div>
+                    <h4>📜 PATIENT HISTORY</h4>
+                    <p>Day 1: Pain 8/10</p>
+                    <p>Day 2: Pain 6/10</p>
+                    <p><strong>Day 3: Pain 4/10</strong></p>
+                    <p>Side Effects: None reported</p>
+                </div>
+                <div>
+                    <h4>📊 PROGRESS</h4>
+                    <p>Pain: 8→6→4 <span style="color: #4CAF50;">(⬇50%)</span></p>
+                    <p>Ama Level: 52% ⬇</p>
+                    <p>Flexibility: 38% ⬆</p>
+                    <a href="#" style="font-size: 0.9rem;">📈 View Full Graph</a>
+                </div>
+            </div>
+            
+            <div style="background: #f0f8f0; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #4a7c4a;">
+                <h4>✅ THERAPY PROTOCOL CHECKLIST - KATI BASTI</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><input type="checkbox" checked> Patient fasting status confirmed</div>
+                    <div><input type="checkbox" checked> Vital signs normal (BP: 118/76)</div>
+                    <div><input type="checkbox" checked> Oil warmed to body temperature</div>
+                    <div><input type="checkbox"> Dough ring placed properly</div>
+                    <div><input type="checkbox"> Oil retained for 30-40 minutes</div>
+                    <div><input type="checkbox"> Patient comfortable</div>
+                    <div><input type="checkbox"> Gentle massage around area</div>
+                    <div><input type="checkbox"> Rest advised for 30 minutes</div>
+                    <div><input type="checkbox"> Avoid cold exposure</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn-primary" style="flex: 1;">Start Session</button>
+                <button class="btn-secondary" style="flex: 1;">Mark Complete</button>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 2rem;">
+            <h3>📅 TODAY'S PATIENT LIST</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Therapy</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:00 AM</td>
+                        <td>Amit Shah</td>
+                        <td>Abhyanga</td>
+                        <td><span class="status green">✅ Done</span></td>
+                        <td><a href="#">View Notes</a></td>
+                    </tr>
+                    <tr>
+                        <td>10:30 AM</td>
+                        <td>Meera Nair</td>
+                        <td>Kati Basti</td>
+                        <td><span class="status green">✅ Done</span></td>
+                        <td><a href="#">View Notes</a></td>
+                    </tr>
+                    <tr>
+                        <td>02:00 PM</td>
+                        <td>Rajesh K.</td>
+                        <td>Abhyanga</td>
+                        <td><span class="status emergency">🔴 EMERG</span></td>
+                        <td><a href="#" style="color: #f44336; font-weight: bold;">Respond Now</a></td>
+                    </tr>
+                    <tr>
+                        <td>04:30 PM</td>
+                        <td>Priya S.</td>
+                        <td>Kati Basti</td>
+                        <td><span class="status yellow">🟡 Ready</span></td>
+                        <td><a href="#">Start</a></td>
+                    </tr>
+                    <tr>
+                        <td>06:00 PM</td>
+                        <td>Suresh P.</td>
+                        <td>Consult</td>
+                        <td><span class="status yellow">⏳ Waiting</span></td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

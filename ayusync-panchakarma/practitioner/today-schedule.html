@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today&apos;s Schedule | AyuSync Practitioner</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="../js/doctor-common.js" defer></script>
+  <script type="module" src="../js/doctor-data.js" defer></script>
+</head>
+<body>
+  <!-- Sidebar injected by doctor-common.js -->
+  <div class="main-content">
+    <div class="max-w-6xl mx-auto p-8">
+      <!-- Header -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2 flex items-center">
+            <i class="fas fa-calendar-day text-green-600 mr-4 text-3xl"></i>
+            Today&apos;s Schedule
+          </h1>
+          <p class="text-xl text-gray-600">
+            <span id="todayDate" class="font-semibold text-green-700"></span> | 
+            <span id="totalAppts" class="font-semibold">4 Appointments</span>
+          </p>
+        </div>
+        <div class="flex gap-4 mt-6 lg:mt-0">
+          <button onclick="printSchedule()" class="px-6 py-3 bg-white border-2 border-green-200 text-green-700 rounded-2xl hover:bg-green-50 font-semibold shadow-md transition-all">
+            <i class="fas fa-print mr-2"></i>Print
+          </button>
+          <button onclick="exportToPDF()" class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
+            <i class="fas fa-download mr-2"></i>Export PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="bg-white rounded-3xl shadow-xl p-8 mb-10 border border-gray-100">
+        <div class="flex flex-col lg:flex-row gap-6 items-center">
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+              <input type="text" id="searchInput" placeholder="Search patients, symptoms..." 
+                     class="w-full pl-12 pr-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-green-400 focus:ring-4 focus:ring-green-100 transition-all shadow-inner">
+            </div>
+          </div>
+          <div class="flex gap-4 flex-wrap">
+            <select id="statusFilter" class="px-6 py-3 border-2 border-gray-200 rounded-2xl focus:border-green-400 transition-all">
+              <option>All Status</option>
+              <option>Waiting</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+              <option>Emergency</option>
+            </select>
+            <button onclick="refreshSchedule()" class="px-6 py-3 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-all font-semibold">
+              <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8 border border-blue-100">
+        <h3 class="font-bold text-lg text-blue-800 mb-4">Status Legend</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+          <div class="flex items-center space-x-3">
+            <span class="w-4 h-4 bg-yellow-400 rounded-full shadow-lg"></span>
+            <span>🟡 Waiting</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="w-4 h-4 bg-blue-500 rounded-full shadow-lg"></span>
+            <span>🔵 In Progress</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="w-4 h-4 bg-green-500 rounded-full shadow-lg"></span>
+            <span>✅ Completed</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="w-4 h-4 bg-red-500 rounded-full shadow-lg animate-pulse"></span>
+            <span>🔴 Emergency</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments List -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Priority/Emergency -->
+        <div class="bg-gradient-to-br from-rose-50 to-red-50 rounded-3xl p-8 border-4 border-red-200 shadow-2xl">
+          <h2 class="text-2xl font-bold text-red-800 mb-6 flex items-center">
+            <i class="fas fa-exclamation-triangle text-2xl mr-3 text-red-500"></i>
+            Priority Queue
+          </h2>
+          <div id="emergencyList" class="space-y-4">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+
+        <!-- Today&apos;s Schedule -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100 overflow-x-auto">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">Full Schedule</h2>
+          <div class="min-w-[600px]">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="p-4 text-left font-semibold text-gray-700">Time</th>
+                  <th class="p-4 text-left font-semibold text-gray-700">Patient</th>
+                  <th class="p-4 text-left font-semibold text-gray-700">Symptoms</th>
+                  <th class="p-4 text-left font-semibold text-gray-700">Status</th>
+                  <th class="p-4 text-left font-semibold text-gray-700">Check-in</th>
+                  <th class="p-4 text-left font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allAppointments = [];
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadTodaySchedule();
+      setupEventListeners();
+      document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      });
+    });
+
+    function loadTodaySchedule() {
+      allAppointments = doctorData.todayAppointments.sort((a, b) => {
+        if (a.isEmergency !== b.isEmergency) return b.isEmergency - a.isEmergency;
+        return new Date('2024-01-01 ' + a.time) - new Date('2024-01-01 ' + b.time);
+      });
+      
+      document.getElementById('totalAppts').textContent = `${allAppointments.length} Appointments`;
+      renderAppointments();
+      renderEmergencies();
+    }
+
+    function renderAppointments() {
+      const tbody = document.getElementById('scheduleTableBody');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filter = document.getElementById('statusFilter').value;
+
+      const filtered = allAppointments.filter(appt => {
+        const matchesSearch = appt.patient.toLowerCase().includes(search) || 
+                             appt.symptoms.toLowerCase().includes(search);
+        const matchesFilter = !filter || appt.status === filter.toLowerCase();
+        return matchesSearch && matchesFilter;
+      });
+
+      tbody.innerHTML = filtered.map(appt => `
+        <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+          <td class="p-4 font-semibold text-lg ${appt.isEmergency ? 'text-red-600' : 'text-green-700'}">
+            ${appt.time}
+          </td>
+          <td class="p-4 font-semibold">
+            <div>${appt.patient}</div>
+            <div class="text-sm text-gray-500">${appt.age} yrs</div>
+          </td>
+          <td class="p-4 text-gray-700">${appt.symptoms}</td>
+          <td class="p-4">
+            <span class="status-badge px-4 py-2 rounded-full text-sm font-bold shadow-md
+              ${appt.status === 'emergency' ? 'bg-red-100 text-red-800 border-2 border-red-200' : ''}
+              ${appt.status === 'waiting' ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-200' : ''}
+              ${appt.status === 'in-progress' ? 'bg-blue-100 text-blue-800 border-2 border-blue-200' : ''}
+              ${appt.status === 'completed' ? 'bg-green-100 text-green-800 border-2 border-green-200' : ''}">
+              ${appt.status === 'emergency' ? '🔴 EMERGENCY' : 
+                appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
+            </span>
+          </td>
+          <td class="p-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold
+              ${appt.checkin === 'arrived' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}">
+              ${appt.checkin}
+            </span>
+          </td>
+          <td class="p-4">
+            <div class="flex gap-2 flex-wrap">
+              <button onclick="startConsultation('${appt.id}')" 
+                      class="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 transition-all shadow-md">
+                <i class="fas fa-play mr-1"></i>Start
+              </button>
+              ${appt.status !== 'completed' ? 
+                `<button onclick="markComplete('${appt.id}')" 
+                         class="px-4 py-2 bg-green-600 text-white text-sm rounded-xl hover:bg-green-700 transition-all shadow-md">
+                  <i class="fas fa-check mr-1"></i>Complete
+                </button>` : ''}
+              <a href="patient-detail.html?id=${appt.patient.toLowerCase().replace(' ', '-')}" 
+                 class="px-4 py-2 bg-gray-600 text-white text-sm rounded-xl hover:bg-gray-700 transition-all shadow-md">
+                <i class="fas fa-eye mr-1"></i>View
+              </a>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderEmergencies() {
+      const emergencies = allAppointments.filter(a => a.isEmergency);
+      const container = document.getElementById('emergencyList');
+      
+      if (emergencies.length === 0) {
+        container.innerHTML = '<div class="bg-green-100 border-2 border-green-200 rounded-2xl p-6 text-center text-green-800 font-semibold">✅ No emergencies today</div>';
+      } else {
+        container.innerHTML = emergencies.map(appt => `
+          <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-6 shadow-lg animate-pulse">
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 mt-1">
+                🚨
+              </div>
+              <div class="flex-1">
+                <h4 class="font-bold text-xl text-red-800 mb-1">${appt.patient}</h4>
+                <p class="text-red-700 mb-3">${appt.symptoms}</p>
+                <div class="flex gap-3 flex-wrap">
+                  <span class="px-3 py-1 bg-white text-red-800 rounded-xl text-sm font-semibold border border-red-200">
+                    ${appt.time} • Room ${appt.room}
+                  </span>
+                  <button onclick="handleEmergency('${appt.id}')" 
+                          class="px-4 py-2 bg-red-600 text-white text-sm rounded-xl hover:bg-red-700 font-semibold shadow-lg transition-all">
+                    Respond Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', renderAppointments);
+      document.getElementById('statusFilter').addEventListener('change', renderAppointments);
+    }
+
+    function refreshSchedule() {
+      loadTodaySchedule();
+      showToast('Schedule refreshed!');
+    }
+
+    function startConsultation(apptId) {
+      updateAppointmentStatus(apptId, 'in-progress', 'arrived');
+      showToast('Consultation started');
+      window.location.href = 'consultation.html?appt=' + apptId;
+    }
+
+    function markComplete(apptId) {
+      if (confirm('Mark as completed?')) {
+        updateAppointmentStatus(apptId, 'completed', 'arrived');
+        renderAppointments();
+        renderEmergencies();
+        showToast('Appointment completed ✓');
+      }
+    }
+
+    function handleEmergency(apptId) {
+      updateAppointmentStatus(apptId, 'in-progress', 'arrived');
+      showToast('Emergency prioritized!', 'error');
+      renderAppointments();
+      renderEmergencies();
+    }
+
+    // Print & Export
+    function printSchedule() {
+      window.print();
+    }
+
+    function exportToPDF() {
+      // Simple PDF using jsPDF or browser print
+      window.print();
+      showToast('Schedule exported to PDF');
+    }
+  </script>
+</body>
+</html>
+

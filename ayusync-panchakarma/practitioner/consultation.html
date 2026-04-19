@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Consultation | AyuSync Practitioner</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script type="module" src="../js/doctor-common.js" defer></script>
+  <script type="module" src="../js/doctor-data.js" defer></script>
+</head>
+<body>
+  <!-- Sidebar injected by doctor-common.js -->
+  <div class="main-content">
+    <div class="max-w-4xl mx-auto p-8">
+      <!-- Header -->
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-3xl shadow-2xl mb-8">
+          <i class="fas fa-stethoscope text-2xl"></i>
+          <span class="text-2xl font-bold">New Consultation</span>
+        </div>
+        <div id="patientHeader" class="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
+          <!-- Dynamic patient info -->
+        </div>
+      </div>
+
+      <form id="consultationForm" class="space-y-10">
+        <!-- Symptoms & Diagnosis -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+          <h2 class="text-3xl font-bold text-gray-800 mb-8">
+            <i class="fas fa-notes-medical text-green-600 mr-4"></i>Symptoms & Diagnosis
+          </h2>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <label class="block font-bold text-xl text-gray-700 mb-4">Current Symptoms</label>
+              <textarea id="symptoms" rows="4" class="w-full p-6 border-2 border-gray-200 rounded-2xl text-lg focus:border-green-500 focus:ring-4 focus:ring-green-100 resize-vertical shadow-xl" 
+                        placeholder="Describe patient&apos;s chief complaints, pain level, duration..."></textarea>
+            </div>
+            <div>
+              <label class="block font-bold text-xl text-gray-700 mb-4">Diagnosis</label>
+              <textarea id="diagnosis" rows="4" class="w-full p-6 border-2 border-gray-200 rounded-2xl text-lg focus:border-green-500 focus:ring-4 focus:ring-green-100 resize-vertical shadow-xl" 
+                        placeholder="Your clinical diagnosis (Dosha imbalance, condition...)"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medicines -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+          <h2 class="text-3xl font-bold text-gray-800 mb-8">
+            <i class="fas fa-pills text-blue-600 mr-4"></i>Medicines Prescription
+          </h2>
+          <div id="medicinesList" class="space-y-4 mb-8">
+            <!-- Dynamic medicine rows -->
+            <div class="medicine-row p-6 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all cursor-pointer" onclick="addMedicine()">
+              <div class="flex items-center justify-center h-24 text-gray-500">
+                <i class="fas fa-plus-circle text-3xl mr-3"></i>
+                <span class="text-xl font-semibold">Add Medicine</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Therapies -->
+        <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+          <h2 class="text-3xl font-bold text-gray-800 mb-8">
+            <i class="fas fa-spa text-purple-600 mr-4"></i>Therapy Recommendations
+          </h2>
+          <div id="therapiesList" class="space-y-4 mb-8">
+            <div class="therapy-row p-6 bg-gradient-to-r from-purple-50 to-violet-50 rounded-2xl border-2 border-purple-200 hover:border-purple-400 transition-all">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                  <div class="w-12 h-12 bg-purple-500 text-white rounded-2xl flex items-center justify-center font-bold">KB</div>
+                  <div>
+                    <h4 class="font-bold text-xl">Kati Basti</h4>
+                    <p class="text-gray-600">7 sessions, daily 45 mins</p>
+                  </div>
+                </div>
+                <button onclick="removeTherapy(this)" class="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all">Remove</button>
+              </div>
+            </div>
+            <button type="button" onclick="addTherapy()" class="w-full p-6 bg-indigo-600 text-white rounded-2xl font-bold text-xl hover:bg-indigo-700 shadow-xl transition-all">
+              <i class="fas fa-plus mr-3"></i>Add Therapy
+            </button>
+          </div>
+        </div>
+
+        <!-- Lab Tests & Follow-up -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+              🧪 Lab Test Recommendations
+            </h3>
+            <div class="space-y-3">
+              <label class="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded mr-4 shadow-sm"> CBC (Complete Blood Count)
+              </label>
+              <label class="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded mr-4 shadow-sm"> ESR (Erythrocyte Sedimentation Rate)
+              </label>
+              <label class="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded mr-4 shadow-sm"> Liver Function Test
+              </label>
+              <label class="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                <input type="checkbox" class="w-5 h-5 text-green-600 rounded mr-4 shadow-sm"> Other: <input type="text" class="ml-2 px-3 py-1 border rounded-lg w-32">
+              </label>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">📅 Follow-up</h3>
+            <div class="space-y-4">
+              <label class="block font-semibold text-lg mb-2">Follow-up Date</label>
+              <input type="date" id="followUpDate" class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl text-lg focus:border-green-500 focus:ring-4 shadow-xl">
+              <label class="flex items-center space-x-3 p-4 bg-orange-50 rounded-2xl border-2 border-orange-200">
+                <input type="checkbox" id="urgentFollowup" class="w-5 h-5 text-orange-600 rounded shadow-sm">
+                <span class="font-semibold text-orange-800">Mark as Urgent Follow-up</span>
+              </label>
+              <textarea id="followUpNotes" rows="3" class="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:ring-4 shadow-xl" 
+                        placeholder="Special instructions for follow-up..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Actions -->
+        <div class="flex flex-col sm:flex-row gap-6 pt-12 border-t-4 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-12 rounded-3xl shadow-xl">
+          <button type="button" onclick="saveDraft()" class="flex-1 px-10 py-6 bg-gray-600 text-white rounded-3xl font-bold text-xl shadow-xl hover:bg-gray-700 transition-all">
+            <i class="fas fa-save mr-3"></i>Save Draft
+          </button>
+          <button type="submit" class="flex-1 px-10 py-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-3xl font-bold text-xl shadow-2xl hover:shadow-3xl hover:from-green-700 hover:to-emerald-700 transform hover:-translate-y-2 transition-all">
+            <i class="fas fa-file-prescription mr-3"></i>Generate Prescription
+          </button>
+          <button type="button" onclick="generatePDF()" class="px-10 py-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-3xl font-bold text-xl shadow-2xl hover:shadow-3xl hover:from-blue-700 hover:to-blue-800 transform hover:-translate-y-2 transition-all">
+            <i class="fas fa-download mr-3"></i>Download PDF
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let medicineCount = 0;
+    let currentPatientId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadConsultation();
+    });
+
+    function loadConsultation() {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentPatientId = urlParams.get('patient') || urlParams.get('appt');
+      
+      const patient = doctorData.patients.find(p => p.id == currentPatientId);
+      if (patient) {
+        document.getElementById('patientHeader').innerHTML = `
+          <div class="flex items-center space-x-6">
+            <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-2xl">
+              ${patient.name.charAt(0)}
+            </div>
+            <div>
+              <h2 class="text-3xl font-bold text-gray-800">${patient.name}</h2>
+              <p class="text-xl text-gray-600">${patient.age} years | ${patient.condition} | ID: ${patient.id}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      addMedicineRow();
+      document.getElementById('consultationForm').addEventListener('submit', saveConsultation);
+    }
+
+    function addMedicineRow() {
+      medicineCount++;
+      const container = document.getElementById('medicinesList');
+      const row = document.createElement('div');
+      row.className = 'medicine-row p-8 bg-blue-50 border-2 border-blue-200 rounded-3xl shadow-md hover:shadow-xl transition-all';
+      row.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+          <input type="text" placeholder="Medicine Name" class="p-4 border-2 border-gray-300 rounded-2xl text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full" required>
+          <input type="text" placeholder="Dosage (1-0-1)" class="p-4 border-2 border-gray-300 rounded-2xl text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full" required>
+          <input type="text" placeholder="Duration (7 days)" class="p-4 border-2 border-gray-300 rounded-2xl text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full" required>
+          <input type="text" placeholder="Instructions" class="p-4 border-2 border-gray-300 rounded-2xl text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 w-full md:col-span-1">
+          <button type="button" onclick="this.parentElement.parentElement.remove()" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-2xl transition-all shadow-lg">
+            <i class="fas fa-trash mr-2"></i>Remove
+          </button>
+        </div>
+      `;
+      container.insertBefore(row, container.lastElementChild);
+    }
+
+    function addTherapy() {
+      showToast('Therapy templates coming soon!');
+    }
+
+    function removeTherapy(btn) {
+      btn.parentElement.parentElement.remove();
+    }
+
+    function saveDraft() {
+      showToast('Consultation saved as draft!');
+    }
+
+    function saveConsultation(e) {
+      e.preventDefault();
+      showToast('Consultation saved! Redirecting to prescription...', 'success');
+      setTimeout(() => {
+        window.location.href = 'prescription.html';
+      }, 1500);
+    }
+
+    function generatePDF() {
+      generatePrescriptionPDF({
+        patientId: currentPatientId,
+        diagnosis: document.getElementById('diagnosis').value,
+        medicines: Array.from(document.querySelectorAll('.medicine-row input[type="text"]')).map((input, i) => ({
+          name: input.parentElement.children[0].value,
+          dosage: input.parentElement.children[1].value,
+          duration: input.parentElement.children[2].value,
+          instructions: input.parentElement.children[3].value
+        }))
+      });
+    }
+  </script>
+</body>
+</html>
+
