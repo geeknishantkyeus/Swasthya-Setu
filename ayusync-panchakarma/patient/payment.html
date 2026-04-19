@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | SwasthyaSetu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root {
+            --primary-green: #2D6A4F;
+            --light-green: #74C69D;
+            --cream: #F9F6F0;
+        }
+        body {
+            background: linear-gradient(135deg, var(--cream) 0%, #E8F5E9 100%);
+            min-height: 100vh;
+        }
+        .payment-card {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            transition: transform 0.3s ease;
+        }
+        .payment-card:hover {
+            transform: translateY(-5px);
+        }
+        .method-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+        }
+        .method-card:hover {
+            border-color: var(--light-green);
+            transform: translateY(-2px);
+        }
+        .method-card.selected {
+            border-color: var(--primary-green);
+            background: #F0FDF4;
+        }
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 8px;
+            font-weight: bold;
+            color: #9CA3AF;
+        }
+        .step-dot.active {
+            background: var(--primary-green);
+            color: white;
+        }
+        .step-dot.completed {
+            background: var(--primary-green);
+            color: white;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .razorpay-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #2D6A4F;
+        }
+        .test-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="main-dashboard.html" class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">SS</div>
+            <span class="text-xl font-bold text-green-800">SwasthyaSetu</span>
+        </a>
+        <div class="hidden md:flex gap-6">
+            <a href="main-dashboard.html" class="text-gray-700 hover:text-green-600">Dashboard</a>
+            <a href="problem-selection.html" class="text-gray-700 hover:text-green-600">New Consultation</a>
+            <button onclick="logout()" class="text-red-500 hover:text-red-700">Logout</button>
+        </div>
+    </div>
+</nav>
+<div class="pt-20"></div>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-10 animate-fade-in">
+        <h1 class="text-3xl md:text-4xl font-bold text-green-800 mb-4">
+            💳 Complete Your Payment
+        </h1>
+        
+        <!-- Step Indicator -->
+        <div class="flex justify-center items-center mb-6">
+            <div class="step-dot completed">✓</div>
+            <div class="w-12 h-0.5 bg-green-500"></div>
+            <div class="step-dot completed">✓</div>
+            <div class="w-12 h-0.5 bg-green-500"></div>
+            <div class="step-dot completed">✓</div>
+            <div class="w-12 h-0.5 bg-green-500"></div>
+            <div class="step-dot active">4</div>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- Payment Section -->
+        <div class="payment-card animate-fade-in">
+            <h2 class="text-xl font-bold text-green-800 mb-4">Payment Details</h2>
+            
+            <!-- Amount -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-2xl">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total Amount</span>
+                    <span class="text-2xl font-bold text-green-700" id="totalAmount">₹0</span>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-3">Select Payment Method</label>
+                <div class="space-y-3">
+                    <div class="method-card" data-method="card">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-credit-card text-2xl text-blue-500"></i>
+                            <div>
+                                <p class="font-semibold">Credit / Debit Card</p>
+                                <p class="text-xs text-gray-500">Visa, MasterCard, RuPay</p>
+                            </div>
+                            <div class="ml-auto"><i class="fas fa-chevron-right text-gray-400"></i></div>
+                        </div>
+                    </div>
+                    <div class="method-card" data-method="upi">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-mobile-alt text-2xl text-purple-500"></i>
+                            <div>
+                                <p class="font-semibold">UPI / Mobile Wallet</p>
+                                <p class="text-xs text-gray-500">Google Pay, PhonePe, Paytm</p>
+                            </div>
+                            <div class="ml-auto"><i class="fas fa-chevron-right text-gray-400"></i></div>
+                        </div>
+                    </div>
+                    <div class="method-card" data-method="netbanking">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-university text-2xl text-green-500"></i>
+                            <div>
+                                <p class="font-semibold">Net Banking</p>
+                                <p class="text-xs text-gray-500">All major banks</p>
+                            </div>
+                            <div class="ml-auto"><i class="fas fa-chevron-right text-gray-400"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Razorpay Payment Button -->
+            <button id="razorpayBtn" class="w-full bg-green-600 text-white py-3 rounded-full font-semibold text-lg hover:bg-green-700 transition shadow-lg">
+                <i class="fas fa-lock mr-2"></i>Pay with Razorpay
+            </button>
+            
+            <p class="text-xs text-gray-400 text-center mt-4">
+                <i class="fas fa-shield-alt"></i> Secure payment powered by Razorpay
+            </p>
+            
+            <div class="razorpay-info mt-6">
+                <p class="text-sm font-semibold">🔐 Test Mode Information:</p>
+                <p class="text-xs text-gray-600 mt-1">Use test card: <strong>4111 1111 1111 1111</strong></p>
+                <p class="text-xs text-gray-600">CVV: <strong>111</strong> | Expiry: <strong>12/25</strong></p>
+                <p class="text-xs text-gray-600">OTP: <strong>1111</strong> (any 4 digits)</p>
+            </div>
+        </div>
+
+        <!-- Booking Summary -->
+        <div class="payment-card animate-fade-in">
+            <h2 class="text-xl font-bold text-green-800 mb-4">Booking Summary</h2>
+            <div id="bookingSummary" class="space-y-3">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">Doctor</span>
+                    <span class="font-medium" id="summaryDoctor">-</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">Treatment</span>
+                    <span class="font-medium" id="summaryTreatment">-</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">Date & Time</span>
+                    <span class="font-medium" id="summaryDateTime">-</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">Consultation Fee</span>
+                    <span class="font-medium text-green-700" id="summaryFees">-</span>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">Platform Fee</span>
+                    <span class="font-medium">₹49</span>
+                </div>
+                <div class="flex justify-between py-2 pt-3">
+                    <span class="font-bold text-gray-800">Total</span>
+                    <span class="font-bold text-green-700 text-xl" id="summaryTotal">-</span>
+                </div>
+            </div>
+            <div class="mt-6 p-3 bg-green-50 rounded-xl text-center">
+                <i class="fas fa-check-circle text-green-600"></i>
+                <span class="text-sm text-gray-600 ml-2">100% secure payment</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center animate-fade-in">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check-circle text-green-600 text-4xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-green-800 mb-2">Payment Successful!</h2>
+        <p class="text-gray-600 mb-4">Your appointment has been confirmed.</p>
+        <div id="bookingIdDisplay" class="text-sm text-gray-500 mb-4"></div>
+        <button onclick="goToDashboard()" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700">
+            Go to Dashboard
+        </button>
+    </div>
+</div>
+
+<script>
+    // Razorpay Test Key
+    const RAZORPAY_KEY = "rzp_test_Sf6PfI5kdnQzLr";
+
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-24 right-4 z-50 px-4 py-3 rounded-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} shadow-lg`;
+        toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function logout() { localStorage.clear(); window.location.href = '../auth/login.html'; }
+    function goToDashboard() { window.location.href = 'main-dashboard.html'; }
+
+    let selectedMethod = null;
+    let bookingData = null;
+    let currentUser = null;
+
+    // Get current user
+    function getCurrentUser() {
+        const user = localStorage.getItem('currentUser');
+        if (user) return JSON.parse(user);
+        return { id: 'user_' + Date.now(), name: 'Patient', email: 'patient@example.com', phone: '9999999999' };
+    }
+
+    // Save payment and appointment to localStorage (Firebase disabled for simplicity)
+    function saveToLocalStorage(appointmentData, paymentId, appointmentId) {
+        const completeAppointment = {
+            id: appointmentId,
+            paymentId: paymentId,
+            patientId: currentUser.id,
+            patientName: currentUser.name,
+            doctor: appointmentData.doctor,
+            treatment: appointmentData.treatment,
+            date: appointmentData.date,
+            time: appointmentData.time,
+            fees: appointmentData.fees,
+            totalAmount: appointmentData.totalAmount,
+            paymentMethod: selectedMethod,
+            paymentStatus: 'completed',
+            appointmentStatus: 'confirmed',
+            symptoms: appointmentData.symptoms || [],
+            createdAt: new Date().toISOString()
+        };
+        
+        // Save individual appointment
+        localStorage.setItem('currentAppointment', JSON.stringify(completeAppointment));
+        
+        // Add to user's appointments array
+        const existingAppointments = JSON.parse(localStorage.getItem('userAppointments') || '[]');
+        existingAppointments.push(completeAppointment);
+        localStorage.setItem('userAppointments', JSON.stringify(existingAppointments));
+        
+        // Add to bookings
+        const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+        existingBookings.push({
+            id: appointmentId,
+            doctorName: appointmentData.doctor?.name,
+            therapy: appointmentData.treatment?.therapy,
+            date: appointmentData.date,
+            time: appointmentData.time,
+            status: 'confirmed',
+            paymentStatus: 'completed'
+        });
+        localStorage.setItem('userBookings', JSON.stringify(existingBookings));
+        
+        // Mark onboarding complete
+        localStorage.setItem('hasCompletedOnboarding', 'true');
+        localStorage.setItem('firstTimeVisit', 'false');
+        
+        // Update user profile
+        const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        userProfile.lastAppointment = {
+            id: appointmentId,
+            date: appointmentData.date,
+            doctor: appointmentData.doctor?.name
+        };
+        userProfile.appointmentCount = (userProfile.appointmentCount || 0) + 1;
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    }
+
+    // Open Razorpay Payment
+    function openRazorpayPayment() {
+        if (!selectedMethod) {
+            showToast('Please select a payment method', 'error');
+            return;
+        }
+
+        const amountInPaise = bookingData.totalAmount * 100;
+        
+        const options = {
+            "key": RAZORPAY_KEY,
+            "amount": amountInPaise,
+            "currency": "INR",
+            "name": "SwasthyaSetu",
+            "description": `${bookingData.treatment?.therapy || 'Healthcare Consultation'} - Appointment Booking`,
+            "image": "https://via.placeholder.com/100x100?text=SS",
+            "prefill": {
+                "name": currentUser.name,
+                "email": currentUser.email,
+                "contact": currentUser.phone || "9999999999"
+            },
+            "notes": {
+                "address": "SwasthyaSetu Corporate Office",
+                "patientId": currentUser.id,
+                "doctorName": bookingData.doctor?.name
+            },
+            "theme": {
+                "color": "#2D6A4F"
+            },
+            "handler": function(response) {
+                showToast("Payment Successful! Saving your booking...", "success");
+                
+                const appointmentId = 'APT_' + Date.now();
+                saveToLocalStorage(bookingData, response.razorpay_payment_id, appointmentId);
+                
+                // Clear temporary data
+                localStorage.removeItem('currentBooking');
+                localStorage.removeItem('selectedDoctor');
+                localStorage.removeItem('selectedSymptoms');
+                localStorage.removeItem('userSelection');
+                
+                // Show success modal
+                document.getElementById('bookingIdDisplay').innerHTML = `Booking ID: ${appointmentId}`;
+                document.getElementById('successModal').style.display = 'flex';
+            },
+            "modal": {
+                "ondismiss": function() {
+                    showToast('Payment cancelled', 'error');
+                }
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        currentUser = getCurrentUser();
+        
+        // Load booking data from localStorage
+        const currentBooking = localStorage.getItem('currentBooking');
+        const selectedDoctor = localStorage.getItem('selectedDoctor');
+        const selectedSymptoms = JSON.parse(localStorage.getItem('selectedSymptoms') || '[]');
+        const userSelection = JSON.parse(localStorage.getItem('userSelection') || '{}');
+        const scheduleData = JSON.parse(localStorage.getItem('scheduleData') || '{}');
+        
+        if (currentBooking) {
+            bookingData = JSON.parse(currentBooking);
+        } else if (selectedDoctor) {
+            const doctor = JSON.parse(selectedDoctor);
+            bookingData = {
+                id: 'BOOK_' + Date.now(),
+                doctor: doctor,
+                treatment: { 
+                    type: userSelection.selectedOption || 'AYURVEDA', 
+                    therapy: userSelection.selectedOption === 'AYURVEDA' ? 'Ayurveda Treatment' : 'Modern Medicine',
+                    symptoms: selectedSymptoms
+                },
+                date: scheduleData.date || new Date().toISOString().split('T')[0],
+                time: scheduleData.time || '10:00 AM',
+                fees: doctor.fees || 800,
+                totalAmount: (doctor.fees || 800) + 49,
+                symptoms: selectedSymptoms,
+                location: doctor.location || 'AyurVeda Wellness Center, Bengaluru'
+            };
+        } else {
+            showToast('No booking found. Please schedule first.', 'error');
+            setTimeout(() => window.location.href = 'schedule.html', 1500);
+            return;
+        }
+        
+        // Update summary display
+        const doctorFees = bookingData.doctor?.fees || bookingData.fees || 800;
+        const platformFee = 49;
+        const total = doctorFees + platformFee;
+        bookingData.totalAmount = total;
+        
+        document.getElementById('summaryDoctor').innerText = bookingData.doctor?.name || 'Dr. Anjali Varma';
+        document.getElementById('summaryTreatment').innerText = bookingData.treatment?.therapy || 'Ayurveda Consultation';
+        document.getElementById('summaryDateTime').innerText = `${bookingData.date || 'Today'} at ${bookingData.time || '10:00 AM'}`;
+        document.getElementById('summaryFees').innerHTML = `₹${doctorFees.toLocaleString()}`;
+        document.getElementById('summaryTotal').innerHTML = `₹${total.toLocaleString()}`;
+        document.getElementById('totalAmount').innerHTML = `₹${total.toLocaleString()}`;
+        
+        // Payment method selection
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMethod = this.dataset.method;
+            });
+        });
+        
+        // Razorpay button click
+        const razorpayBtn = document.getElementById('razorpayBtn');
+        razorpayBtn.addEventListener('click', openRazorpayPayment);
+    });
+</script>
+
+</body>
+</html>
