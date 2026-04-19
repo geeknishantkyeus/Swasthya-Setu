@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Signup - Step 1 | AyuSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="signup-container">
+        <div class="step-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+        
+        <h1>🌱 Begin Your Healing Journey</h1>
+        
+        <form id="signup-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" min="18" max="100" required>
+                <span>years</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Gender</label>
+                <select required>
+                    <option value="">Select</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" required>
+            </div>
+            
+            <div class="form-group">
+                <label>📋 I want to receive updates via:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" checked> WhatsApp</label>
+                    <label><input type="checkbox" checked> SMS</label>
+                    <label><input type="checkbox"> Email</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2rem;">Continue →</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 2rem; color: #666;">
+            <a href="../index.html">← Back to Home</a> | Step 1 of 4
+        </p>
+    </div>
+    
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Save form data and navigate to new flow
+            const formData = new FormData(e.target);
+            const userData = Object.fromEntries(formData);
+            localStorage.setItem('userData', JSON.stringify(userData));
+            // Navigate to problem selection
+            window.location.href = 'problem-selection.html';
+        });
+    </script>
+</body>
+</html>

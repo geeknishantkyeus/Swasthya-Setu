@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Selection | SwasthyaSetu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary-green: #2D6A4F; 
+            --light-green: #74C69D;
+            --cream: #F9F6F0;
+        }
+        body {
+            background: linear-gradient(135deg, var(--cream) 0%, #E8F5E9 100%);
+            min-height: 100vh;
+        }
+        .doctor-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #E5E7EB;
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+        }
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--light-green);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .doctor-card.selected {
+            border-color: var(--primary-green);
+            background: #F0FDF4;
+            box-shadow: 0 20px 25px -5px rgba(45,106,79,0.2);
+        }
+        .step-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 8px;
+            font-weight: bold;
+            color: #9CA3AF;
+        }
+        .step-dot.active {
+            background: var(--primary-green);
+            color: white;
+        }
+        .step-dot.completed {
+            background: var(--primary-green);
+            color: white;
+        }
+        .rating-stars {
+            color: #fbbf24;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .doctor-card {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .demo-data-btn {
+            background: #f59e0b;
+            transition: all 0.3s;
+        }
+        .demo-data-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Simple Navbar -->
+<nav class="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="new-dashboard.html" class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">SS</div>
+            <span class="text-xl font-bold text-green-800">SwasthyaSetu</span>
+        </a>
+        <div class="hidden md:flex gap-6">
+            <a href="main-dashboard.html" class="text-gray-700 hover:text-green-600">Dashboard</a>
+            <a href="problem-selection.html" class="text-gray-700 hover:text-green-600">New Consultation</a>
+            <button onclick="logout()" class="text-red-500 hover:text-red-700">Logout</button>
+        </div>
+    </div>
+</nav>
+<div class="pt-20"></div>
+
+<main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-green-800 mb-4">
+            👨‍⚕️ Choose Your Doctor
+        </h1>
+        
+        <!-- Step Indicator -->
+        <div class="flex justify-center items-center mb-6">
+            <div class="step-dot completed">✓</div>
+            <div class="w-12 h-0.5 bg-green-500"></div>
+            <div class="step-dot completed">✓</div>
+            <div class="w-12 h-0.5 bg-green-500"></div>
+            <div class="step-dot active">3</div>
+            <div class="w-12 h-0.5 bg-gray-300"></div>
+            <div class="step-dot">4</div>
+        </div>
+        
+        <!-- Treatment Summary Card -->
+        <div id="treatmentSummary" class="bg-white rounded-2xl p-4 shadow-md inline-block">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-stethoscope text-green-600 text-xl"></i>
+                <span id="summaryText" class="text-gray-700">Loading treatment details...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" id="doctorsGrid">
+        <!-- Loading state -->
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-green-600"></i>
+            <p class="text-gray-500 mt-2">Loading doctors...</p>
+        </div>
+    </div>
+
+    <!-- Continue Button -->
+    <div class="text-center">
+        <button id="confirmDoctorBtn" class="bg-green-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-green-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hidden">
+            <i class="fas fa-calendar-check mr-2"></i>Confirm & Schedule Appointment
+        </button>
+    </div>
+</main>
+
+<script>
+    // ============ COMPLETE DOCTORS DATASET ============
+    const doctorsDataset = {
+        ayurveda: [
+            {
+                id: "ayur_1",
+                name: "Dr. Anjali Varma",
+                specialization: "Musculoskeletal & Panchakarma",
+                experience: "12 years",
+                qualifications: "BAMS, MD (Panchakarma)",
+                rating: 4.9,
+                reviews: 234,
+                languages: ["Hindi", "English", "Malayalam"],
+                location: "Ganga Block - 102, AyurVeda Wellness Center, Bengaluru",
+                fees: 800,
+                availableSlots: ["09:00 AM", "10:30 AM", "02:00 PM", "04:30 PM"],
+                image: "👩‍⚕️",
+                bio: "Specializes in Kati Basti and chronic pain management. Trained in Kerala tradition.",
+                conditions: ["Joint Pain", "Arthritis", "Back Pain", "Musculoskeletal"]
+            },
+            {
+                id: "ayur_2",
+                name: "Dr. Rajesh Nair",
+                specialization: "Mental Health & Shirodhara",
+                experience: "15 years",
+                qualifications: "BAMS, MD (Ayurvedic Psychiatry)",
+                rating: 4.8,
+                reviews: 189,
+                languages: ["Hindi", "English", "Tamil"],
+                location: "Yamuna Block - 205, AyurVeda Wellness Center, Bengaluru",
+                fees: 1000,
+                availableSlots: ["10:00 AM", "12:00 PM", "03:00 PM", "05:00 PM"],
+                image: "👨‍⚕️",
+                bio: "Expert in stress management, anxiety, and sleep disorders using Shirodhara.",
+                conditions: ["Stress/Anxiety", "Sleep Issues", "Depression", "Mental Health"]
+            },
+            {
+                id: "ayur_3",
+                name: "Dr. Meera Krishnan",
+                specialization: "Gastroenterology & Detox",
+                experience: "10 years",
+                qualifications: "BAMS, MD (Ayurvedic Medicine)",
+                rating: 4.9,
+                reviews: 312,
+                languages: ["Hindi", "English", "Tamil", "Sanskrit"],
+                location: "Godavari Block - 301, AyurVeda Wellness Center, Bengaluru",
+                fees: 900,
+                availableSlots: ["09:30 AM", "11:30 AM", "02:30 PM", "04:00 PM"],
+                image: "👩‍⚕️",
+                bio: "Specializes in Virechana and Panchakarma for digestive disorders.",
+                conditions: ["Digestion Issues", "Acidity", "Constipation", "IBS"]
+            },
+            {
+                id: "ayur_4",
+                name: "Dr. Suresh Iyer",
+                specialization: "Skin & Hair Care",
+                experience: "8 years",
+                qualifications: "BAMS, MD (Dermatology)",
+                rating: 4.7,
+                reviews: 156,
+                languages: ["Hindi", "English", "Marathi"],
+                location: "Kaveri Block - 104, AyurVeda Wellness Center, Bengaluru",
+                fees: 750,
+                availableSlots: ["11:00 AM", "01:00 PM", "03:30 PM", "06:00 PM"],
+                image: "👨‍⚕️",
+                bio: "Expert in Raktamokshana and herbal treatments for skin conditions.",
+                conditions: ["Skin Issues", "Eczema", "Psoriasis", "Acne"]
+            },
+            {
+                id: "ayur_5",
+                name: "Dr. Lakshmi Menon",
+                specialization: "Respiratory & Allergy",
+                experience: "11 years",
+                qualifications: "BAMS, MD (Respiratory Medicine)",
+                rating: 4.8,
+                reviews: 178,
+                languages: ["Hindi", "English", "Malayalam"],
+                location: "Krishna Block - 203, AyurVeda Wellness Center, Bengaluru",
+                fees: 850,
+                availableSlots: ["09:00 AM", "11:00 AM", "02:00 PM", "05:00 PM"],
+                image: "👩‍⚕️",
+                bio: "Specializes in respiratory conditions, asthma, and allergies.",
+                conditions: ["Respiratory Issues", "Asthma", "Allergies", "Cough"]
+            }
+        ],
+        modern: [
+            {
+                id: "mod_1",
+                name: "Dr. Vikram Reddy",
+                specialization: "Orthopedics & Joint Replacement",
+                experience: "18 years",
+                qualifications: "MBBS, MS (Orthopedics)",
+                rating: 4.8,
+                reviews: 456,
+                languages: ["Hindi", "English", "Telugu"],
+                location: "Apollo Hospital, 3rd Floor, Room 301, Bengaluru",
+                fees: 1200,
+                availableSlots: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"],
+                image: "👨‍⚕️",
+                bio: "Senior orthopedic surgeon specializing in arthritis and sports injuries.",
+                conditions: ["Joint Pain", "Arthritis", "Fracture", "Back Pain"]
+            },
+            {
+                id: "mod_2",
+                name: "Dr. Priya Srinivas",
+                specialization: "Psychiatry & Mental Health",
+                experience: "14 years",
+                qualifications: "MBBS, MD (Psychiatry)",
+                rating: 4.9,
+                reviews: 278,
+                languages: ["Hindi", "English", "Kannada"],
+                location: "Manipal Hospital, Block B, Room 205, Bengaluru",
+                fees: 1500,
+                availableSlots: ["10:00 AM", "12:00 PM", "03:00 PM", "05:30 PM"],
+                image: "👩‍⚕️",
+                bio: "Specializes in anxiety, depression, and CBT therapy.",
+                conditions: ["Stress/Anxiety", "Depression", "Sleep Issues", "Mental Health"]
+            },
+            {
+                id: "mod_3",
+                name: "Dr. Anil Kumar",
+                specialization: "Gastroenterology",
+                experience: "16 years",
+                qualifications: "MBBS, DM (Gastroenterology)",
+                rating: 4.8,
+                reviews: 345,
+                languages: ["Hindi", "English", "Punjabi"],
+                location: "Fortis Hospital, 2nd Floor, Room 108, Bengaluru",
+                fees: 1300,
+                availableSlots: ["09:30 AM", "11:30 AM", "02:30 PM", "04:30 PM"],
+                image: "👨‍⚕️",
+                bio: "Expert in digestive disorders, endoscopy, and liver diseases.",
+                conditions: ["Digestion Issues", "Acidity", "IBS", "Constipation"]
+            },
+            {
+                id: "mod_4",
+                name: "Dr. Sunita Sharma",
+                specialization: "Dermatology",
+                experience: "12 years",
+                qualifications: "MBBS, MD (Dermatology)",
+                rating: 4.7,
+                reviews: 234,
+                languages: ["Hindi", "English", "Punjabi"],
+                location: "Columbia Asia Hospital, 1st Floor, Room 112, Bengaluru",
+                fees: 1100,
+                availableSlots: ["10:30 AM", "01:00 PM", "03:00 PM", "05:00 PM"],
+                image: "👩‍⚕️",
+                bio: "Specializes in acne, psoriasis, and cosmetic dermatology.",
+                conditions: ["Skin Issues", "Acne", "Psoriasis", "Eczema"]
+            },
+            {
+                id: "mod_5",
+                name: "Dr. Rakesh Gupta",
+                specialization: "Pulmonology",
+                experience: "15 years",
+                qualifications: "MBBS, MD (Pulmonology)",
+                rating: 4.8,
+                reviews: 267,
+                languages: ["Hindi", "English", "Gujarati"],
+                location: "Narayana Health, 2nd Floor, Room 105, Bengaluru",
+                fees: 1250,
+                availableSlots: ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM"],
+                image: "👨‍⚕️",
+                bio: "Specializes in respiratory diseases, asthma, and COPD.",
+                conditions: ["Respiratory Issues", "Asthma", "COPD", "Allergies"]
+            }
+        ],
+        
+        getDoctorsByCategory: function(category, symptom) {
+            let doctors = this[category.toLowerCase()];
+            if (!doctors) return [];
+            
+            // Filter doctors based on symptom match
+            if (symptom) {
+                const matchedDoctors = doctors.filter(doc => 
+                    doc.conditions.some(cond => 
+                        cond.toLowerCase().includes(symptom.toLowerCase()) ||
+                        symptom.toLowerCase().includes(cond.toLowerCase())
+                    )
+                );
+                if (matchedDoctors.length > 0) {
+                    doctors = matchedDoctors;
+                }
+            }
+            
+            return doctors;
+        }
+    };
+
+    // Toast function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-24 right-4 z-50 px-4 py-3 rounded-lg text-white ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} shadow-lg`;
+        toast.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '../auth/login.html';
+    }
+
+    // Function to set demo data (for testing when no data exists)
+    function setDemoData() {
+        const demoData = {
+            selectedOption: "AYURVEDA",
+            symptoms: ["Joint Pain", "Stress/Anxiety"],
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('userSelection', JSON.stringify(demoData));
+        localStorage.setItem('selectedSymptoms', JSON.stringify(demoData.symptoms));
+        localStorage.setItem('recommendationResult', JSON.stringify(demoData));
+        showToast("Demo data loaded! Please refresh the page.", "success");
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }
+
+    let selectedDoctor = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Page loaded - Checking localStorage...");
+        
+        // Log all localStorage items for debugging
+        console.log("localStorage contents:");
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            console.log(`  ${key}:`, localStorage.getItem(key));
+        }
+        
+        // Try to get treatment data from multiple possible localStorage keys
+        let treatmentOption = null;
+        let selectedSymptoms = [];
+        
+        // Check 1: recommendationResult (from recommendation page)
+        const recommendationResult = JSON.parse(localStorage.getItem('recommendationResult') || '{}');
+        if (recommendationResult.selectedOption) {
+            treatmentOption = recommendationResult.selectedOption;
+            if (recommendationResult.symptoms) {
+                selectedSymptoms = recommendationResult.symptoms;
+            }
+            console.log("Found from recommendationResult:", treatmentOption);
+        }
+        
+        // Check 2: userSelection
+        if (!treatmentOption) {
+            const userSelection = JSON.parse(localStorage.getItem('userSelection') || '{}');
+            if (userSelection.selectedOption) {
+                treatmentOption = userSelection.selectedOption;
+                if (userSelection.symptoms) {
+                    selectedSymptoms = userSelection.symptoms;
+                }
+                console.log("Found from userSelection:", treatmentOption);
+            }
+        }
+        
+        // Check 3: selectedSymptoms
+        if (selectedSymptoms.length === 0) {
+            const symptomsFromStorage = JSON.parse(localStorage.getItem('selectedSymptoms') || '[]');
+            if (symptomsFromStorage.length > 0) {
+                selectedSymptoms = symptomsFromStorage;
+                console.log("Found symptoms:", selectedSymptoms);
+            }
+        }
+        
+        // Check 4: treatmentPlan
+        if (!treatmentOption) {
+            const treatmentPlan = JSON.parse(localStorage.getItem('treatmentPlan') || '{}');
+            if (treatmentPlan.type) {
+                treatmentOption = treatmentPlan.type;
+                console.log("Found from treatmentPlan:", treatmentOption);
+            }
+        }
+        
+        // If still no data, show demo button
+        if (!treatmentOption) {
+            console.log("No data found in localStorage");
+            const grid = document.getElementById('doctorsGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-exclamation-triangle text-6xl text-orange-500 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">No Treatment Data Found</h3>
+                        <p class="text-gray-500 mb-6">Please complete the recommendation process first.</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button onclick="window.location.href='recommendation.html'" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-arrow-left mr-2"></i>Go to Recommendation
+                            </button>
+                            <button onclick="setDemoData()" class="demo-data-btn text-white px-6 py-3 rounded-lg">
+                                <i class="fas fa-flask mr-2"></i>Load Demo Data (Testing)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
+        }
+        
+        // Update treatment summary
+        const summaryText = document.getElementById('summaryText');
+        if (summaryText) {
+            summaryText.innerHTML = `
+                <i class="fas ${treatmentOption === 'AYURVEDA' ? 'fa-leaf text-green-600' : 'fa-hospital text-blue-600'} mr-2"></i>
+                <strong>${treatmentOption === 'AYURVEDA' ? '🌿 Ayurveda Treatment' : '🏥 Modern Medicine'}</strong>
+                <span class="mx-2">•</span>
+                ${selectedSymptoms.length || 1} condition(s)
+                <span class="mx-2">•</span>
+                ${treatmentOption === 'AYURVEDA' ? 'Natural Healing' : 'Evidence-based Medicine'}
+            `;
+        }
+        
+        // Get primary symptom for doctor filtering
+        const primarySymptom = selectedSymptoms[0] || null;
+        console.log("Primary symptom for filtering:", primarySymptom);
+        console.log("Treatment option:", treatmentOption);
+        
+        // Load doctors
+        const doctors = doctorsDataset.getDoctorsByCategory(treatmentOption, primarySymptom);
+        const grid = document.getElementById('doctorsGrid');
+        
+        if (grid) {
+            grid.innerHTML = '';
+            
+            if (doctors.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-user-md text-6xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">No doctors available for this category.</p>
+                        <button onclick="window.location.href='recommendation.html'" class="mt-4 text-green-600 hover:underline">
+                            ← Go back and try again
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            doctors.forEach((doctor, index) => {
+                const card = document.createElement('div');
+                card.className = 'doctor-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.setAttribute('data-doctor-id', doctor.id);
+                
+                // Generate star rating HTML
+                const fullStars = Math.floor(doctor.rating);
+                const hasHalfStar = doctor.rating % 1 !== 0;
+                let starsHtml = '';
+                for (let i = 0; i < fullStars; i++) starsHtml += '★';
+                if (hasHalfStar) starsHtml += '½';
+                for (let i = 0; i < 5 - Math.ceil(doctor.rating); i++) starsHtml += '☆';
+                
+                card.innerHTML = `
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br ${treatmentOption === 'AYURVEDA' ? 'from-green-400 to-green-600' : 'from-blue-400 to-blue-600'} flex items-center justify-center text-3xl shadow-md">
+                            ${doctor.image}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800">${doctor.name}</h3>
+                            <p class="text-sm text-green-600 font-medium">${doctor.specialization}</p>
+                            <div class="flex items-center gap-1 mt-1">
+                                <div class="rating-stars text-sm">
+                                    ${starsHtml}
+                                </div>
+                                <span class="text-xs text-gray-500">(${doctor.reviews})</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">${doctor.experience} • ${doctor.languages.slice(0, 2).join(', ')}</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-100 pt-4 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Consultation Fee</span>
+                            <span class="text-xl font-bold text-green-700">₹${doctor.fees.toLocaleString()}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <i class="fas fa-map-marker-alt text-red-400 text-xs"></i>
+                            <span class="truncate">${doctor.location}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 italic mt-2">${doctor.bio.substring(0, 80)}...</p>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            ${doctor.availableSlots.slice(0, 3).map(slot => 
+                                `<span class="text-xs bg-gray-100 px-2 py-1 rounded-full">${slot}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                card.onclick = (function(doc) {
+                    return function() { selectDoctor(doc, this); };
+                })(doctor);
+                
+                grid.appendChild(card);
+            });
+        }
+    });
+    
+    function selectDoctor(doctor, cardElement) {
+        // Remove selection from all cards
+        document.querySelectorAll('.doctor-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selection to clicked card
+        cardElement.classList.add('selected');
+        selectedDoctor = doctor;
+        
+        // Show confirm button
+        const confirmBtn = document.getElementById('confirmDoctorBtn');
+        if (confirmBtn) {
+            confirmBtn.classList.remove('hidden');
+        }
+        
+        console.log("Selected doctor:", doctor.name);
+    }
+    
+    document.getElementById('confirmDoctorBtn')?.addEventListener('click', function() {
+        if (!selectedDoctor) {
+            showToast('Please select a doctor first', 'error');
+            return;
+        }
+        
+        // Save selected doctor to localStorage
+        localStorage.setItem('selectedDoctor', JSON.stringify(selectedDoctor));
+        
+        showToast(`Dr. ${selectedDoctor.name} selected! Redirecting...`, 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'schedule.html';
+        }, 1000);
+    });
+</script>
+
+</body>
+</html>

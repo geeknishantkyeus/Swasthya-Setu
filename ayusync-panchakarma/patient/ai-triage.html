@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Symptom Analyzer - Step 2 | AyuSync</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="signup-container">
+        <div class="step-indicator">
+            <div class="step-dot"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+        
+        <h1>🔍 Tell Us What You're Experiencing</h1>
+        <p>(Our AI will guide you to the right care)</p>
+        
+        <form id="triage-form">
+            <div class="form-group">
+                <label>Select Primary Concern:</label>
+                <div class="symptom-grid">
+                    <div class="symptom-card" data-symptom="joint">
+                        🦴<br>Joint Pain
+                    </div>
+                    <div class="symptom-card" data-symptom="stress">
+                        😮‍💨<br>Stress Anxiety
+                    </div>
+                    <div class="symptom-card" data-symptom="digestion">
+                        🤢<br>Digestion
+                    </div>
+                    <div class="symptom-card" data-symptom="sleep">
+                        😴<br>Sleep Issues
+                    </div>
+                    <div class="symptom-card" data-symptom="respiratory">
+                        🫁<br>Respiratory
+                    </div>
+                    <div class="symptom-card" data-symptom="skin">
+                        💆<br>Skin Issues
+                    </div>
+                    <div class="symptom-card" data-symptom="detox">
+                        🔥<br>Detox Need
+                    </div>
+                    <div class="symptom-card" data-symptom="fatigue">
+                        ⚡<br>Fatigue
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Describe in your own words (Optional but helpful):</label>
+                <textarea rows="4" placeholder="e.g. Lower back pain that gets worse after sitting for long hours. Also feeling bloated after meals..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>⚡ Emergency Symptoms (Check if any apply):</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox"> Chest Pain</label>
+                    <label><input type="checkbox"> Difficulty Breathing</label>
+                    <label><input type="checkbox"> Severe Bleeding</label>
+                    <label><input type="checkbox"> High Fever (&amp;gt;103°F)</label>
+                    <label><input type="checkbox"> Sudden Vision Loss</label>
+                </div>
+                <p style="color: #d32f2f; font-size: 0.9rem; margin-top: 0.5rem;">
+                    ⚠️ If checked, please seek immediate emergency care
+                </p>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2rem;">
+                Analyze My Symptoms →
+            </button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 2rem; color: #666;">
+            <a href="signup.html">← Back</a> | Step 2 of 4
+        </p>
+    </div>
+    
+    <script src="../js/ai-triage.js"></script>
+</body>
+</html>

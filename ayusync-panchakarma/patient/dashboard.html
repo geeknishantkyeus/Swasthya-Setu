@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard | SwasthyaSetu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2D6A4F;
+            --light-green: #74C69D;
+            --cream: #F9F6F0;
+            --dark-green: #1B4332;
+            --emergency-red: #E63946;
+        }
+        body { background-color: var(--cream); color: #333; font-family: 'Segoe UI', system-ui; }
+        .toast { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .stat-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <!-- Toast -->
+    <div id="toast" class="toast hidden bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-x-full transition-all duration-300"></div>
+
+    <!-- Navbar -->
+    <nav class="bg-white/95 backdrop-blur-xl shadow-2xl rounded-3xl p-4 mb-8 sticky top-4 z-40 max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-3xl font-bold bg-gradient-to-r from-[var(--primary-green)] to-[var(--dark-green)] bg-clip-text text-transparent flex items-center gap-3">
+                <i class="fas fa-leaf"></i> SwasthyaSetu
+            </div>
+            <div class="flex items-center gap-4 flex-wrap">
+                <a href="problem-selection.html" class="px-6 py-3 bg-[var(--light-green)] text-[var(--dark-green)] font-bold rounded-2xl hover:bg-[var(--primary-green)] hover:text-white transition-all shadow-lg">
+                    New Consultation
+                </a>
+                <a href="schedule.html" class="px-6 py-3 bg-gray-200 text-gray-800 font-bold rounded-2xl hover:bg-gray-300 transition-all shadow-lg">
+                    My Appointments
+                </a>
+                <a href="payment.html" class="px-6 py-3 bg-blue-100 text-blue-800 font-bold rounded-2xl hover:bg-blue-200 transition-all shadow-lg hidden" id="paymentLink">
+                    Complete Payment
+                </a>
+                <span id="userName" class="font-semibold text-[var(--primary-green)] hidden">👋 Priya Sharma</span>
+                <button id="logoutBtn" class="px-6 py-3 bg-red-100 text-[var(--emergency-red)] font-bold rounded-2xl hover:bg-red-200 transition-all shadow-lg">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto space-y-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-[var(--primary-green)] to-[var(--dark-green)] text-white shadow-2xl rounded-3xl p-8 md:p-12 text-center">
+            <h1 id="welcomeMsg" class="text-4xl md:text-5xl font-black mb-6">👋 Welcome back, Priya!</h1>
+            <p class="text-2xl opacity-95 mb-8">📅 <span id="currentDate"></span> | "Your healing journey is <span id="progressPercent">43</span>% complete"</p>
+            <div class="w-full bg-white/20 backdrop-blur-xl rounded-full h-4 overflow-hidden mx-auto max-w-md">
+                <div id="progressBar" class="bg-gradient-to-r from-yellow-300 to-emerald-300 h-4 rounded-full transition-all duration-1000 shadow-lg" style="width: 43%"></div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="stat-card bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10 hover:shadow-3xl transition-all">
+                <div class="text-4xl mb-6">📊</div>
+                <h3 class="text-2xl font-bold text-[var(--primary-green)] mb-4">Total Sessions</h3>
+                <div id="totalSessions" class="text-4xl font-black text-gray-800 mb-2">7</div>
+                <div id="completedSessions" class="text-xl font-semibold text-green-600">(3 completed)</div>
+            </div>
+            <div class="stat-card bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10 hover:shadow-3xl transition-all">
+                <div class="text-4xl mb-6">🎯</div>
+                <h3 class="text-2xl font-bold text-[var(--primary-green)] mb-4">Completion Rate</h3>
+                <div class="bg-gray-200 h-5 rounded-full mb-4 overflow-hidden">
+                    <div id="completionBar" class="bg-gradient-to-r from-[var(--primary-green)] to-[var(--light-green)] h-5 rounded-full transition-all duration-1000" style="width: 43%"></div>
+                </div>
+                <div id="completionRate" class="text-3xl font-black text-[var(--primary-green)]">43%</div>
+            </div>
+            <div class="stat-card bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10 hover:shadow-3xl transition-all">
+                <div class="text-4xl mb-6">⭐</div>
+                <h3 class="text-2xl font-bold text-[var(--primary-green)] mb-4">Overall Health</h3>
+                <div id="healthStatus" class="text-3xl font-black text-green-600">+25%<br><span class="text-xl font-normal text-gray-700">Improving</span></div>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-[var(--primary-green)]">📋 Active Booking</h2>
+                <a href="schedule.html" class="text-[var(--light-green)] font-bold hover:text-[var(--primary-green)] text-xl">View Schedule →</a>
+            </div>
+            <div id="todaySchedule" class="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-2xl border-l-8 border-blue-400 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center text-center md:text-left">
+                    <div class="text-4xl font-bold text-blue-700" id="todayTime">4:30 PM</div>
+                    <div class="md:text-center">
+                        <div id="todayTherapy" class="text-2xl font-bold text-[var(--primary-green)] mb-1">Kati Basti Session 3/7</div>
+                        <div id="todayDoctor" class="text-xl font-semibold text-gray-700">Dr. Anjali Varma</div>
+                    </div>
+                    <div id="todayRoom" class="text-lg font-bold text-gray-600">Ganga Block - 102</div>
+                    <div class="text-2xl font-bold bg-green-100 text-green-700 px-6 py-3 rounded-2xl">🟢 Check-in Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Chart -->
+        <div class="bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10">
+            <h2 class="text-3xl font-bold text-[var(--primary-green)] mb-8 text-center">📈 Pain Level Progress</h2>
+<div class="w-full" style="height: 40rem;">
+  <canvas id="painChart"></canvas>
+</div>
+            <p class="text-center text-2xl font-bold mt-6 text-[var(--primary-green)]">Current: <span id="currentPain">4</span> | Target: <span class="text-red-500">1</span> ▼</p>
+        </div>
+
+        <!-- Pre/Post Care & Feedback -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-gradient-to-br from-emerald-50 to-green-100 shadow-2xl rounded-3xl p-8 border border-green-200">
+                <h3 class="text-2xl font-bold text-[var(--primary-green)] mb-6 flex items-center gap-3">💚 Today's Care Instructions</h3>
+                <div class="space-y-4 text-xl">
+                    <div class="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-md">
+                        <div class="w-12 h-12 bg-green-400 rounded-xl flex items-center justify-center text-white font-bold text-xl">1</div>
+                        <span>Light breakfast only</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-md">
+                        <div class="w-12 h-12 bg-green-400 rounded-xl flex items-center justify-center text-white font-bold text-xl">2</div>
+                        <span>Wear loose cotton clothes</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-md">
+                        <div class="w-12 h-12 bg-green-400 rounded-xl flex items-center justify-center text-white font-bold text-xl">3</div>
+                        <span>Arrive 15 minutes early</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 shadow-2xl rounded-3xl p-8 border border-blue-200">
+                <h3 class="text-2xl font-bold text-blue-700 mb-6 flex items-center gap-3">📝 Quick Feedback</h3>
+                <div class="space-y-4">
+                    <p class="text-xl font-semibold mb-4">How was your session?</p>
+                    <div class="grid grid-cols-3 md:grid-cols-4 gap-3 mb-6">
+                        <button class="feedback-btn p-6 rounded-2xl font-bold text-3xl bg-emerald-100 hover:bg-emerald-200 shadow-lg transition-all">😊 Great</button>
+                        <button class="feedback-btn p-6 rounded-2xl font-bold text-3xl bg-yellow-100 hover:bg-yellow-200 shadow-lg transition-all">😐 Okay</button>
+                        <button class="feedback-btn p-6 rounded-2xl font-bold text-3xl bg-orange-100 hover:bg-orange-200 shadow-lg transition-all">😕 Bad</button>
+                    </div>
+                    <textarea id="feedbackText" rows="3" class="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-400 focus:ring-2 focus:ring-blue-200 resize-vertical shadow-lg" placeholder="Share your experience..."></textarea>
+                    <button id="submitFeedback" class="w-full bg-blue-600 text-white py-4 px-8 rounded-2xl font-bold text-xl hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all">Submit Feedback</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Schedule -->
+        <div class="bg-white shadow-2xl rounded-3xl p-8 border border-[var(--primary-green)]/10">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-[var(--primary-green)]">📅 Treatment Progress</h2>
+                <a href="schedule.html" class="text-[var(--light-green)] font-bold hover:text-[var(--primary-green)] text-xl">Full Schedule →</a>
+            </div>
+            <div id="upcomingList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-200 hover:shadow-xl transition-all">Apr 19: Abhyanga (10:00 AM)</div>
+                <div class="p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 hover:shadow-xl transition-all">Apr 20: REST DAY</div>
+                <div class="p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl border border-orange-200 hover:shadow-xl transition-all">Apr 21: Kati Basti (4:30 PM)</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast bg-${type === 'error' ? 'red' : 'green'}-500 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-x-0 transition-all duration-300`;
+            setTimeout(() => toast.classList.add('translate-x-full'), 3000);
+        }
+
+        // Load data
+        let mockData = {
+            totalSessions: 7,
+            completedSessions: 3,
+            progress: 43,
+            healthImprovement: 25,
+            currentPain: 4,
+            painChartData: [8, 7, 6, 5, 4, 3, 2],
+            today: { time: '4:30 PM', therapy: 'Kati Basti Session 3/7', doctor: 'Dr. Anjali Varma', room: 'Ganga Block - 102' }
+        };
+
+        window.addEventListener('load', () => {
+            // Try load from localStorage
+            // Load new onboarding flow data
+            const bookingDetails = JSON.parse(localStorage.getItem('bookingDetails'));
+            const paymentStatus = localStorage.getItem('paymentStatus');
+            const selectedOption = JSON.parse(localStorage.getItem('selectedOption') || '{}');
+            
+            if (bookingDetails) {
+                document.getElementById('todayTherapy').textContent = bookingDetails.therapy + ' Session 1/' + bookingDetails.totalSessions;
+                document.getElementById('todayDoctor').textContent = selectedOption.type === 'ayurveda' ? 'Dr. Anjali Varma' : 'Dr. Rajesh Kumar';
+                document.getElementById('todayRoom').textContent = bookingDetails.location.split(',')[0];
+                mockData.totalSessions = bookingDetails.totalSessions;
+            }
+            
+            if (paymentStatus === 'completed') {
+                document.getElementById('paymentLink').classList.remove('hidden');
+            }
+
+            updateDashboard();
+            initChart();
+            document.getElementById('userName').classList.remove('hidden');
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        });
+
+        function updateDashboard() {
+            document.getElementById('progressPercent').textContent = mockData.progress;
+            document.getElementById('progressBar').style.width = mockData.progress + '%';
+            document.getElementById('totalSessions').textContent = mockData.totalSessions;
+            document.getElementById('completedSessions').textContent = `(${mockData.completedSessions} completed)`;
+            document.getElementById('completionRate').textContent = mockData.progress + '%';
+            document.getElementById('completionBar').style.width = mockData.progress + '%';
+            document.getElementById('healthStatus').innerHTML = `+${mockData.healthImprovement}%<br><span class="text-xl font-normal text-gray-700">Improving</span>`;
+            document.getElementById('currentPain').textContent = mockData.currentPain;
+
+            // Update today's schedule
+            document.getElementById('todayTime').textContent = mockData.today.time;
+            document.getElementById('todayTherapy').textContent = mockData.today.therapy;
+            document.getElementById('todayDoctor').textContent = mockData.today.doctor;
+            document.getElementById('todayRoom').textContent = mockData.today.room;
+        }
+
+        // Chart.js
+        let painChart;
+        function initChart() {
+            const ctx = document.getElementById('painChart').getContext('2d');
+            painChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Session 1', '2', '3', '4', '5', '6', '7'],
+                    datasets: [{
+                        label: 'Pain Level (0-10)',
+                        data: mockData.painChartData,
+                        borderColor: 'rgb(45, 106, 79)',
+                        backgroundColor: 'rgba(116, 198, 157, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2D6A4F',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 3,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // Feedback
+        document.querySelectorAll('.feedback-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('bg-blue-500', 'text-white'));
+                btn.classList.add('bg-blue-500', 'text-white');
+            };
+        });
+
+        document.getElementById('submitFeedback').onclick = () => {
+            const selected = document.querySelector('.feedback-btn.bg-blue-500');
+            if (selected) {
+                // Mock chart update
+                mockData.painChartData[mockData.painChartData.length - 1] -= 0.5;
+                mockData.currentPain = Math.max(1, mockData.currentPain - 0.5);
+                mockData.progress = Math.min(90, mockData.progress + 5);
+                updateDashboard();
+                painChart.update('none');
+                showToast('Thank you for your feedback! Progress updated. 🙏');
+                document.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('bg-blue-500', 'text-white'));
+                document.getElementById('feedbackText').value = '';
+            }
+        };
+
+        // Logout
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.clear();
+            showToast('Logged out successfully');
+            setTimeout(() => window.location.href = '../../index.html', 1000);
+        };
+    </script>
+</body>
+</html>

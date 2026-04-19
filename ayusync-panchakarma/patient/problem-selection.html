@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Your Health Issues - SwasthyaSetu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Add CSS from above */
+    .symptom-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid #E5E7EB;
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .symptom-card.selected {
+      background-color: #2D6A4F;
+      color: white;
+      border-color: #2D6A4F;
+    }
+    .symptom-card.selected .symptom-icon {
+      filter: brightness(0) invert(1);
+    }
+    .symptom-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .animate-slide-in {
+      animation: slideIn 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-cream to-green-50 min-h-screen">
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <!-- Progress Indicator -->
+  <div class="flex items-center justify-between mb-8">
+    <button id="backBtn" class="text-green-600 hover:text-green-700 flex items-center gap-2">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+      <span class="text-gray-400">→</span>
+      <span class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm">2</span>
+      <span class="text-gray-400">→</span>
+      <span class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm">3</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-2xl md:text-3xl font-bold text-green-800">🔍 What health issues are you facing?</h1>
+    <p class="text-gray-500 mt-2">Select all that apply to get personalized recommendations</p>
+  </div>
+
+  <!-- Symptom Grid -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <!-- Joint Pain -->
+    <div class="symptom-card" data-symptom="Joint Pain">
+      <div class="symptom-icon text-3xl mb-2">🦴</div>
+      <h3 class="font-semibold">Joint Pain</h3>
+      <p class="text-xs opacity-75">Knee, Back, Arthritis</p>
+    </div>
+    
+    <!-- Stress/Anxiety -->
+    <div class="symptom-card" data-symptom="Stress/Anxiety">
+      <div class="symptom-icon text-3xl mb-2">😮‍💨</div>
+      <h3 class="font-semibold">Stress/Anxiety</h3>
+      <p class="text-xs opacity-75">Tension, Worry, Panic</p>
+    </div>
+    
+    <!-- Digestion Issues -->
+    <div class="symptom-card" data-symptom="Digestion Issues">
+      <div class="symptom-icon text-3xl mb-2">🤢</div>
+      <h3 class="font-semibold">Digestion Issues</h3>
+      <p class="text-xs opacity-75">Bloating, Acidity, Gas</p>
+    </div>
+    
+    <!-- Sleep Issues -->
+    <div class="symptom-card" data-symptom="Sleep Issues">
+      <div class="symptom-icon text-3xl mb-2">😴</div>
+      <h3 class="font-semibold">Sleep Issues</h3>
+      <p class="text-xs opacity-75">Insomnia, Restless</p>
+    </div>
+    
+    <!-- Respiratory -->
+    <div class="symptom-card" data-symptom="Respiratory Issues">
+      <div class="symptom-icon text-3xl mb-2">🫁</div>
+      <h3 class="font-semibold">Respiratory</h3>
+      <p class="text-xs opacity-75">Cough, Asthma, Cold</p>
+    </div>
+    
+    <!-- Skin Issues -->
+    <div class="symptom-card" data-symptom="Skin Issues">
+      <div class="symptom-icon text-3xl mb-2">💆</div>
+      <h3 class="font-semibold">Skin Issues</h3>
+      <p class="text-xs opacity-75">Rash, Acne, Eczema</p>
+    </div>
+    
+    <!-- Detox Need -->
+    <div class="symptom-card" data-symptom="Detox Need">
+      <div class="symptom-icon text-3xl mb-2">🔥</div>
+      <h3 class="font-semibold">Detox Need</h3>
+      <p class="text-xs opacity-75">Cleanse, Purification</p>
+    </div>
+    
+    <!-- Fatigue -->
+    <div class="symptom-card" data-symptom="Fatigue">
+      <div class="symptom-icon text-3xl mb-2">⚡</div>
+      <h3 class="font-semibold">Fatigue</h3>
+      <p class="text-xs opacity-75">Tired, Low Energy</p>
+    </div>
+  </div>
+
+  <!-- Selection Counter -->
+  <div class="text-center mb-6">
+    <p class="text-gray-600">Selected: <span id="selectedCount" class="font-bold text-green-600">0</span> symptoms</p>
+  </div>
+
+  <!-- Continue Button -->
+  <div class="flex justify-center">
+    <button id="continueBtn" class="bg-green-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-green-700 transition flex items-center gap-2 opacity-50 cursor-not-allowed">
+      Continue <i class="fas fa-arrow-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Complete working JavaScript
+  const symptomsList = [
+    "Joint Pain", "Stress/Anxiety", "Digestion Issues", "Sleep Issues",
+    "Respiratory Issues", "Skin Issues", "Detox Need", "Fatigue"
+  ];
+  
+  let selectedSymptoms = [];
+  
+  // Load saved selections
+  function loadSavedSelections() {
+    const saved = localStorage.getItem('selectedSymptoms');
+    if (saved) {
+      selectedSymptoms = JSON.parse(saved);
+      selectedSymptoms.forEach(symptom => {
+        const card = document.querySelector(`.symptom-card[data-symptom="${symptom}"]`);
+        if (card) card.classList.add('selected');
+      });
+    }
+    updateSelectedCount();
+  }
+  
+  // Save to localStorage
+  function saveSelections() {
+    localStorage.setItem('selectedSymptoms', JSON.stringify(selectedSymptoms));
+  }
+  
+  // Toggle selection
+  function toggleSymptom(symptom, element) {
+    const index = selectedSymptoms.indexOf(symptom);
+    if (index === -1) {
+      selectedSymptoms.push(symptom);
+      element.classList.add('selected');
+    } else {
+      selectedSymptoms.splice(index, 1);
+      element.classList.remove('selected');
+    }
+    saveSelections();
+    updateSelectedCount();
+  }
+  
+  // Update counter and button state
+  function updateSelectedCount() {
+    const count = selectedSymptoms.length;
+    const counter = document.getElementById('selectedCount');
+    const btn = document.getElementById('continueBtn');
+    
+    if (counter) counter.innerText = count;
+    
+    if (btn) {
+      if (count === 0) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+  }
+  
+  // Continue button handler
+  function continueToRecommendation() {
+    if (selectedSymptoms.length === 0) {
+      alert('Please select at least one health issue');
+      return;
+    }
+    
+    // Save to localStorage for next page
+    localStorage.setItem('userSymptoms', JSON.stringify(selectedSymptoms));
+    
+    // Redirect to recommendation page
+    window.location.href = 'recommendation.html';
+  }
+  
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSavedSelections();
+    
+    // Add click listeners to all symptom cards
+    document.querySelectorAll('.symptom-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const symptom = card.getAttribute('data-symptom');
+        toggleSymptom(symptom, card);
+      });
+    });
+    
+    // Continue button
+    const continueBtn = document.getElementById('continueBtn');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', continueToRecommendation);
+    }
+    
+    // Back button
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        window.location.href = 'new-dashboard.html';
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
